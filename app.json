@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "LifePilot AI",
+    "slug": "lifepilot-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7C3AED"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.lifepilot.ai",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used to capture documents and notes",
+        "NSPhotoLibraryUsageDescription": "Used to upload screenshots and images",
+        "NSMicrophoneUsageDescription": "Used to record voice notes",
+        "NSSpeechRecognitionUsageDescription": "Used to transcribe voice notes",
+        "NSCalendarsUsageDescription": "Used to sync with your calendar",
+        "NSRemindersUsageDescription": "Used to create reminders from tasks"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#7C3AED"
+      },
+      "package": "com.lifepilot.ai",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "READ_CALENDAR",
+        "WRITE_CALENDAR"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow LifePilot to access your photos to upload screenshots and documents."
+        }
+      ]
+    ]
+  }
+}
