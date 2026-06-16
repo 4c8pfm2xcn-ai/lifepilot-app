@@ -16,6 +16,9 @@ import { TasksScreen } from '../screens/TasksScreen';
 import { FocusScreen } from '../screens/FocusScreen';
 import { WeeklyReviewScreen } from '../screens/WeeklyReviewScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { AssistantScreen } from '../screens/AssistantScreen';
+import { MealPlannerScreen } from '../screens/MealPlannerScreen';
+import { RemindersScreen } from '../screens/RemindersScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -37,11 +40,7 @@ function MainTabs() {
         },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textTertiary,
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '600',
-          marginTop: -4,
-        },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: -4 },
       }}
     >
       <Tab.Screen
@@ -55,47 +54,6 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Inbox"
-        component={InboxScreen}
-        options={{
-          tabBarLabel: 'Inbox',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'mail' : 'mail-outline'} size={22} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Focus"
-        component={FocusScreen}
-        options={{
-          tabBarLabel: 'Focus',
-          tabBarIcon: ({ color, focused, size }) => (
-            <View
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 26,
-                backgroundColor: focused ? colors.accent : colors.accentLight,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 4,
-                shadowColor: colors.accent,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: focused ? 0.4 : 0,
-                shadowRadius: 8,
-                elevation: focused ? 6 : 0,
-              }}
-            >
-              <Ionicons name="flash" size={24} color={focused ? '#FFF' : colors.accent} />
-            </View>
-          ),
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: '600',
-          },
-        }}
-      />
-      <Tab.Screen
         name="Planner"
         component={PlannerScreen}
         options={{
@@ -106,12 +64,42 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Tasks"
-        component={TasksScreen}
+        name="Assistant"
+        component={AssistantScreen}
         options={{
-          tabBarLabel: 'Tasks',
+          tabBarLabel: 'Pilot',
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={{
+                width: 52, height: 52, borderRadius: 26,
+                backgroundColor: focused ? colors.accent : colors.accentLight,
+                alignItems: 'center', justifyContent: 'center', marginBottom: 4,
+                shadowColor: colors.accent, shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: focused ? 0.4 : 0, shadowRadius: 8, elevation: focused ? 6 : 0,
+              }}
+            >
+              <Ionicons name="sparkles" size={24} color={focused ? '#FFF' : colors.accent} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Kitchen"
+        component={MealPlannerScreen}
+        options={{
+          tabBarLabel: 'Kitchen',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'checkbox' : 'checkbox-outline'} size={22} color={color} />
+            <Ionicons name={focused ? 'restaurant' : 'restaurant-outline'} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Reminders"
+        component={RemindersScreen}
+        options={{
+          tabBarLabel: 'Reminders',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'notifications' : 'notifications-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -136,16 +124,11 @@ export function AppNavigator({ isOnboardingComplete }: { isOnboardingComplete: b
         <Stack.Screen name="Setup" component={SetupScreen} />
         <Stack.Screen name="Premium" component={PremiumScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
-        <Stack.Screen
-          name="WeeklyReview"
-          component={WeeklyReviewScreen}
-          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-        />
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-        />
+        <Stack.Screen name="Tasks" component={TasksScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="Inbox" component={InboxScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="Focus" component={FocusScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="WeeklyReview" component={WeeklyReviewScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
