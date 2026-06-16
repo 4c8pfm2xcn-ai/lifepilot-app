@@ -82,9 +82,14 @@ export function AssistantScreen({ navigation }: any) {
           <Text style={[styles.title, { color: colors.text }]}>Pilot</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Your voice assistant</Text>
         </View>
-        <TouchableOpacity onPress={() => Voice.stopSpeaking()} style={[styles.iconBtn, { backgroundColor: colors.surfaceSecondary }]}>
-          <Ionicons name="volume-mute-outline" size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+          <TouchableOpacity onPress={() => navigation.navigate('FocusBlocker')} style={[styles.iconBtn, { backgroundColor: colors.surfaceSecondary }]}>
+            <Ionicons name="shield-outline" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => Voice.stopSpeaking()} style={[styles.iconBtn, { backgroundColor: colors.surfaceSecondary }]}>
+            <Ionicons name="volume-mute-outline" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView ref={scrollRef} style={styles.thread} contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxl }}>
