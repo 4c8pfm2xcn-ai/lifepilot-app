@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useStore } from './src/store';
 import { AppNavigator } from './src/navigation';
 import { useColors } from './src/theme';
+import { initNotifications } from './src/services/notifications';
 
 function AppContent() {
   const colors = useColors();
@@ -14,6 +15,7 @@ function AppContent() {
   const isOnboardingComplete = useStore((s) => s.isOnboardingComplete);
 
   useEffect(() => {
+    initNotifications();
     loadData();
   }, []);
 
@@ -45,9 +47,5 @@ export default function App() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });
