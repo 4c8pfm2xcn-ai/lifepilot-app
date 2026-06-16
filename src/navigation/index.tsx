@@ -19,6 +19,7 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { AssistantScreen } from '../screens/AssistantScreen';
 import { MealPlannerScreen } from '../screens/MealPlannerScreen';
 import { RemindersScreen } from '../screens/RemindersScreen';
+import { FocusBlockerScreen } from '../screens/FocusBlockerScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -127,6 +128,7 @@ export function AppNavigator({ isOnboardingComplete }: { isOnboardingComplete: b
         <Stack.Screen name="Tasks" component={TasksScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="Inbox" component={InboxScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="Focus" component={FocusScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="FocusBlocker" component={FocusBlockerScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="WeeklyReview" component={WeeklyReviewScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack.Navigator>
