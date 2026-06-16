@@ -8,6 +8,8 @@ import {
 import { format, addDays } from 'date-fns';
 import * as Notif from '../services/notifications';
 import { extractTasks, autoSchedule, parseAssistantCommand, parseNaturalLanguage } from '../services/ai';
+import * as Blocker from '../services/appBlocker';
+import { BlockedApp, FocusBlockSession, BlockSchedule, BlockerSettings } from '../types';
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   wakeTime: '07:00',
@@ -74,6 +76,22 @@ interface AppState {
   assistantMessages: AssistantMessage[];
   notificationLog: NotificationRecord[];
   notificationsReady: boolean;
+
+  // Focus / app + game blocker
+  blockedApps: BlockedApp[];
+  focusBlock: FocusBlockSession | null;
+  blockSchedules: BlockSchedule[];
+  blockerSettings: BlockerSettings;
+  initBlocker: () => Promise<void>;
+  requestBlockerAuth: () => Promise<boolean>;
+  toggleBlockedApp: (id: string) => void;
+  addBlockedApp: (name: string, category: BlockedApp['category']) => void;
+  startFocusBlock: (minutes: number, strict: boolean, appIds?: string[]) => Promise<void>;
+  endFocusBlock: (force?: boolean) => Promise<boolean>;
+  isAppBlockedNow: () => boolean;
+  addBlockSchedule: (s: Omit<BlockSchedule, 'id'>) => void;
+  toggleBlockSchedule: (id: string) => void;
+  deleteBlockSchedule: (id: string) => void;
 
   // User
   setUser: (user: User) => void;
@@ -171,6 +189,10 @@ export const useStore = create<AppState>((set, get) => ({
   assistantMessages: [],
   notificationLog: [],
   notificationsReady: false,
+  blockedApps: Blocker.DEFAULT_BLOCK_CATALOG.map((a) => ({ ...a, id: generateId(), blocked: false })),
+  focusBlock: null,
+  blockSchedules: [],
+  blockerSettings: { installed: Blocker.isNativeEnforcementAvailable(), authorized: false, platform: Blocker.currentPlatform() },
 
   setUser: (user) => set({ user }),
 
@@ -647,9 +669,86 @@ export const useStore = create<AppState>((set, get) => ({
     return { reply };
   },
 
+  /* ---------------- FOCUS / APP + GAME BLOCKER ---------------- */
+  initBlocker: async () => {
+    const installed = Blocker.isNativeEnforcementAvailable();
+    const authorized = installed ? await Blocker.isAuthorized() : false;
+    set({ blockerSettings: { installed, authorized, platform: Blocker.currentPlatform() } });
+  },
+
+  requestBlockerAuth: async () => {
+    const ok = await Blocker.requestAuthorization();
+    set((state) => ({ blockerSettings: { ...state.blockerSettings, authorized: ok, installed: Blocker.isNativeEnforcementAvailable() } }));
+    return ok;
+  },
+
+  toggleBlockedApp: (id) => {
+    set((state) => ({ blockedApps: state.blockedApps.map((a) => (a.id === id ? { ...a, blocked: !a.blocked } : a)) }));
+    get().saveData();
+  },
+
+  addBlockedApp: (name, category) => {
+    set((state) => ({ blockedApps: [{ id: generateId(), name, category, icon: category === 'game' ? 'game-controller' : 'apps-outline', blocked: true }, ...state.blockedApps] }));
+    get().saveData();
+  },
+
+  startFocusBlock: async (minutes, strict, appIds) => {
+    const ids = appIds && appIds.length ? appIds : get().blockedApps.filter((a) => a.blocked).map((a) => a.id);
+    const now = new Date();
+    const endsAt = new Date(now.getTime() + minutes * 60000);
+    // Attempt real OS-level shield (dev build). Falls back to in-app block otherwise.
+    await Blocker.startShield(ids);
+    const session: FocusBlockSession = { id: generateId(), startedAt: now.toISOString(), endsAt: endsAt.toISOString(), appIds: ids, strict, active: true };
+    set({ focusBlock: session });
+    if (get().notificationsReady) {
+      Notif.scheduleAt({ title: '\u2705 Focus session complete', body: 'Your apps are unblocked. Nice work staying focused!', date: endsAt, channel: 'reminder' });
+    }
+    get().saveData();
+  },
+
+  endFocusBlock: async (force) => {
+    const fb = get().focusBlock;
+    if (!fb) return true;
+    // Strict mode blocks early exit until the timer is up.
+    if (fb.strict && !force && new Date(fb.endsAt).getTime() > Date.now()) return false;
+    await Blocker.stopShield();
+    set({ focusBlock: null });
+    get().saveData();
+    return true;
+  },
+
+  isAppBlockedNow: () => {
+    const { focusBlock, blockSchedules } = get();
+    if (focusBlock && focusBlock.active && new Date(focusBlock.endsAt).getTime() > Date.now()) return true;
+    const now = new Date();
+    const cur = now.getHours() * 60 + now.getMinutes();
+    const dow = now.getDay();
+    return blockSchedules.some((s) => {
+      if (!s.enabled || !s.daysOfWeek.includes(dow)) return false;
+      const [sh, sm] = s.startTime.split(':').map(Number);
+      const [eh, em] = s.endTime.split(':').map(Number);
+      return cur >= sh * 60 + sm && cur < eh * 60 + em;
+    });
+  },
+
+  addBlockSchedule: (s) => {
+    set((state) => ({ blockSchedules: [...state.blockSchedules, { ...s, id: generateId() }] }));
+    get().saveData();
+  },
+
+  toggleBlockSchedule: (id) => {
+    set((state) => ({ blockSchedules: state.blockSchedules.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s)) }));
+    get().saveData();
+  },
+
+  deleteBlockSchedule: (id) => {
+    set((state) => ({ blockSchedules: state.blockSchedules.filter((s) => s.id !== id) }));
+    get().saveData();
+  },
+
   loadData: async () => {
     try {
-      const keys = ['user','tasks','schedule','inbox','weeklyReport','habits','alarms','bills','reminders','recipes','plannedMeals','grocery','pantry','assistant'];
+      const keys = ['user','tasks','schedule','inbox','weeklyReport','habits','alarms','bills','reminders','recipes','plannedMeals','grocery','pantry','assistant','blockedApps','blockSchedules'];
       const stored = await AsyncStorage.multiGet(keys);
       const map: Record<string, any> = {};
       stored.forEach(([k, v]) => { if (v) try { map[k] = JSON.parse(v); } catch {} });
@@ -669,9 +768,12 @@ export const useStore = create<AppState>((set, get) => ({
         grocery: map.grocery || [],
         pantry: map.pantry || [],
         assistantMessages: map.assistant || [],
+        blockedApps: map.blockedApps && map.blockedApps.length ? map.blockedApps : get().blockedApps,
+        blockSchedules: map.blockSchedules || [],
         isLoading: false,
       });
       if (map.user) get().initNotifications();
+      get().initBlocker();
     } catch { set({ isLoading: false }); }
   },
 
@@ -693,6 +795,8 @@ export const useStore = create<AppState>((set, get) => ({
         ['grocery', JSON.stringify(s.grocery)],
         ['pantry', JSON.stringify(s.pantry)],
         ['assistant', JSON.stringify(s.assistantMessages)],
+        ['blockedApps', JSON.stringify(s.blockedApps)],
+        ['blockSchedules', JSON.stringify(s.blockSchedules)],
       ]);
     } catch (e) { console.warn('save failed', e); }
   },
