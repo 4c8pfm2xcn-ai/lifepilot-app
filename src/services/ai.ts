@@ -67,14 +67,14 @@ export function parseTime(text: string): string | undefined {
     let h = parseInt(m[1]); const min = parseInt(m[2]);
     if (m[3] === 'pm' && h < 12) h += 12;
     if (m[3] === 'am' && h === 12) h = 0;
-    return \`\${String(h).padStart(2,'0')}:\${String(min).padStart(2,'0')}\`;
+    return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
   }
   m = t.match(/\bat\s+(\d{1,2})\s*(am|pm)\b/) || t.match(/\b(\d{1,2})\s*(am|pm)\b/);
   if (m) {
     let h = parseInt(m[1]);
     if (m[2] === 'pm' && h < 12) h += 12;
     if (m[2] === 'am' && h === 12) h = 0;
-    return \`\${String(h).padStart(2,'0')}:00\`;
+    return `${String(h).padStart(2,'0')}:00`;
   }
   return undefined;
 }
@@ -257,11 +257,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 const PRIORITY_RANK: Record<Priority, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
 
 function hm(date: Date): string {
-  return \`\${String(date.getHours()).padStart(2,'0')}:\${String(date.getMinutes()).padStart(2,'0')}\`;
+  return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
 }
 function minutesToHM(mins: number): string {
   const h = Math.floor(mins / 60) % 24, m = mins % 60;
-  return \`\${String(h).padStart(2,'0')}:\${String(m).padStart(2,'0')}\`;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 }
 function hmToMinutes(s: string): number {
   const [h, m] = s.split(':').map(Number); return h * 60 + m;
@@ -355,7 +355,7 @@ export function autoSchedule(
       blocks.push({
         id: Math.random().toString(36).slice(2, 11),
         taskId: task.id,
-        title: task.splittable && remaining > sessionLen ? \`\${task.title} (session)\` : task.title,
+        title: task.splittable && remaining > sessionLen ? `${task.title} (session)` : task.title,
         startTime: minutesToHM(start),
         endTime: minutesToHM(end),
         date,
@@ -419,26 +419,26 @@ export function parseAssistantCommand(text: string): { reply: string; actions: A
   // Set an alarm
   if (/set (an )?alarm|wake me/.test(t)) {
     const time = parseTime(t);
-    actions.push({ type: 'set_alarm', label: time ? \`Set alarm for \${time}\` : 'Set alarm', payload: { time } });
-    return { reply: time ? \`Alarm set for \${time}. I\'ll make sure it goes off.\` : 'What time should I set the alarm for?', actions };
+    actions.push({ type: 'set_alarm', label: time ? `Set alarm for ${time}` : 'Set alarm', payload: { time } });
+    return { reply: time ? `Alarm set for ${time}. I\'ll make sure it goes off.` : 'What time should I set the alarm for?', actions };
   }
   // Remind me
   if (/remind me|set a reminder/.test(t)) {
     const intent = parseNaturalLanguage(t);
-    actions.push({ type: 'add_reminder', label: \`Remind: \${intent.title}\`, payload: intent });
-    return { reply: \`Reminder set: "\${intent.title}"\${intent.dueTime ? ' at ' + intent.dueTime : ''}. It'll notify you.\`, actions };
+    actions.push({ type: 'add_reminder', label: `Remind: ${intent.title}`, payload: intent });
+    return { reply: `Reminder set: "${intent.title}"${intent.dueTime ? ' at ' + intent.dueTime : ''}. It'll notify you.`, actions };
   }
   // Bills / payments
   if (/pay |bill|rent|subscription|due/.test(t) && /\$|\d/.test(t)) {
     const amount = (t.match(/\$?\s*(\d+(?:\.\d{2})?)/) || [])[1];
     actions.push({ type: 'add_bill', label: 'Add bill reminder', payload: { ...parseNaturalLanguage(t), amount: amount ? Number(amount) : undefined } });
-    return { reply: \`I\'ll track that bill\${amount ? ' of $' + amount : ''} and remind you before it\'s due. (I can\'t move money — you\'ll pay it yourself.)\`, actions };
+    return { reply: `I\'ll track that bill${amount ? ' of $' + amount : ''} and remind you before it\'s due. (I can\'t move money — you\'ll pay it yourself.)`, actions };
   }
   // Groceries
   if (/add .* to (my )?(grocery|shopping)|buy |grocery|shopping list/.test(t)) {
     const item = t.replace(/.*(add|buy)\s+/, '').replace(/\s+to.*(grocery|shopping).*/, '').trim();
-    actions.push({ type: 'add_grocery', label: \`Add \${item} to groceries\`, payload: { name: item } });
-    return { reply: \`Added "\${item}" to your grocery list.\`, actions };
+    actions.push({ type: 'add_grocery', label: `Add ${item} to groceries`, payload: { name: item } });
+    return { reply: `Added "${item}" to your grocery list.`, actions };
   }
   // Meals
   if (/plan .*(meal|dinner|lunch|breakfast)|what.*(cook|eat|dinner)/.test(t)) {
@@ -448,14 +448,14 @@ export function parseAssistantCommand(text: string): { reply: string; actions: A
   // Complete a task
   if (/(mark|i )?(done|finished|completed|complete)\b/.test(t)) {
     const what = t.replace(/.*(done|finished|completed|complete)\s*/, '').trim();
-    actions.push({ type: 'complete_task', label: \`Complete: \${what}\`, payload: { query: what } });
-    return { reply: \`Nice work! Marking "\${what}" complete.\`, actions };
+    actions.push({ type: 'complete_task', label: `Complete: ${what}`, payload: { query: what } });
+    return { reply: `Nice work! Marking "${what}" complete.`, actions };
   }
   // Default: treat as a new task
   const intent = parseNaturalLanguage(text);
-  actions.push({ type: 'add_task', label: \`Add task: \${intent.title}\`, payload: intent });
+  actions.push({ type: 'add_task', label: `Add task: ${intent.title}`, payload: intent });
   return {
-    reply: \`Got it. I\'ll add "\${intent.title}"\${intent.dueDate ? ' for ' + intent.dueDate : ''}\${intent.dueTime ? ' at ' + intent.dueTime : ''} as a \${intent.priority}-priority \${intent.category} task.\`,
+    reply: `Got it. I\'ll add "${intent.title}"${intent.dueDate ? ' for ' + intent.dueDate : ''}${intent.dueTime ? ' at ' + intent.dueTime : ''} as a ${intent.priority}-priority ${intent.category} task.`,
     actions,
   };
 }
