@@ -308,3 +308,46 @@ export interface NotificationRecord {
   delivered: boolean;
   sourceId?: string;
 }
+
+/* ============================================================
+   FOCUS / APP + GAME BLOCKER
+   ============================================================ */
+export type BlockCategory = 'social' | 'game' | 'video' | 'shopping' | 'news' | 'browser' | 'other';
+
+export interface BlockedApp {
+  id: string;
+  name: string;
+  category: BlockCategory;
+  icon: string;             // ionicon name or emoji
+  // Platform identifiers used by the native enforcement layer (dev build):
+  androidPackage?: string;  // e.g. "com.instagram.android"
+  iosBundleId?: string;     // e.g. used with FamilyControls token mapping
+  blocked: boolean;
+}
+
+export interface FocusBlockSession {
+  id: string;
+  startedAt: string;        // ISO datetime
+  endsAt: string;           // ISO datetime
+  appIds: string[];         // which BlockedApps are enforced
+  strict: boolean;          // strict mode = cannot end early
+  active: boolean;
+  label?: string;
+}
+
+export interface BlockSchedule {
+  id: string;
+  label: string;
+  startTime: string;        // "HH:MM"
+  endTime: string;          // "HH:MM"
+  daysOfWeek: number[];     // 0-6
+  appIds: string[];
+  enabled: boolean;
+  strict: boolean;
+}
+
+export interface BlockerSettings {
+  installed: boolean;       // native enforcement layer present (dev build)
+  authorized: boolean;      // user granted Screen Time / Accessibility / Usage access
+  platform: 'ios' | 'android' | 'unknown';
+}
