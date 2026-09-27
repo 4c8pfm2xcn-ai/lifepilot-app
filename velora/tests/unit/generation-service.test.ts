@@ -66,6 +66,19 @@ describe("createGeneration", () => {
     expect(repo.refunds.size).toBe(1);
   });
 
+  it("cancels the provider task and refunds if the task id can't be recorded", async () => {
+    const { deps, repo, provider } = setup();
+    const original = repo.updateIfActive.bind(repo);
+    repo.updateIfActive = async (id, patch, lease) => {
+      if (patch.provider_task_id) throw new Error("db write failed");
+      return original(id, patch, lease);
+    };
+    await expect(createGeneration(USER, request, "key-00000011", deps)).rejects.toMatchObject({ code: "internal" });
+    expect(provider.cancelled).toEqual(["task_1"]);
+    expect([...repo.rows.values()][0]!.status).toBe("failed");
+    expect(repo.balances.get(USER)).toBe(100);
+  });
+
   it("fails before charging when the provider is not configured", async () => {
     const { deps, repo } = setup();
     deps.getProvider = () => {

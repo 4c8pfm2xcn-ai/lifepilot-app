@@ -122,16 +122,16 @@ export async function createGeneration(
     return { generationId: charge.generationId, replayed: true, balance: charge.balance };
   }
 
+  let providerTaskId: string;
   try {
-    const { providerTaskId } = await provider.createGeneration({
+    ({ providerTaskId } = await provider.createGeneration({
       model: request.model,
       mode,
       prompt: finalPrompt,
       durationSeconds: request.duration,
       aspectRatio: request.aspectRatio,
       imageUrl,
-    });
-    await deps.repo.updateIfActive(charge.generationId, { provider_task_id: providerTaskId });
+    }));
   } catch (error) {
     const providerError = error instanceof ProviderError ? error : new ProviderError("unknown", String(error), { cause: error });
     logger.error("generation.create.provider", providerError, { generationId: charge.generationId, kind: providerError.kind });
@@ -145,6 +145,26 @@ export async function createGeneration(
       cause: providerError,
       status: providerError.kind === "not_configured" ? 503 : 502,
     });
+  }
+
+  try {
+    await deps.repo.updateIfActive(charge.generationId, { provider_task_id: providerTaskId });
+  } catch (error) {
+    // The provider accepted the job but we couldn't record it. Stop the job so it
+    // isn't billed by the provider, then fail and refund the generation.
+    logger.error("generation.create.record", error, { generationId: charge.generationId });
+    if (provider.cancelGeneration) {
+      await provider.cancelGeneration(providerTaskId).catch((e) => logger.warn("generation.create.cancel", { message: String(e) }));
+    }
+    await deps.repo
+      .updateIfActive(charge.generationId, {
+        status: "failed",
+        error_message: "The generation could not be started. Your credits have been refunded.",
+        completed_at: deps.now().toISOString(),
+      })
+      .catch((e) => logger.warn("generation.create.markFailed", { message: String(e) }));
+    await deps.repo.refund(charge.generationId, "Refund: generation could not be recorded");
+    throw new AppError("internal", "The generation could not be started. Your credits have been refunded.", { cause: error });
   }
 
   return { generationId: charge.generationId, replayed: false, balance: charge.balance };

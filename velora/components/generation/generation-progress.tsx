@@ -41,6 +41,7 @@ export function GenerationProgress({
   const [cancelling, setCancelling] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const attempts = useRef(0);
+  const lastStatus = useRef(initialStatus);
 
   useEffect(() => {
     const start = new Date(createdAt).getTime();
@@ -69,6 +70,11 @@ export function GenerationProgress({
       try {
         const res = await apiFetch<StatusResponse>(`/api/generation/${id}`, { cache: "no-store" });
         setPollError(null);
+        // Re-render the server parts of the page (e.g. the Details badge) when the status changes.
+        if (res.status !== lastStatus.current) {
+          lastStatus.current = res.status;
+          router.refresh();
+        }
         setStatus(res.status);
         setProgress(res.progress);
         if (res.status === "completed" || res.status === "failed" || res.status === "cancelled") {

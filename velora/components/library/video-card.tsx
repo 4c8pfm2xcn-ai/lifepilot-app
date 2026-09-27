@@ -5,6 +5,7 @@ import { HeartIcon } from "@/components/ui/icons";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { GenerationView } from "@/lib/data/queries";
 
+import { ActiveRefresher } from "./active-refresher";
 import { HoverVideo } from "./hover-video";
 
 export function VideoCard({ generation, index = 0 }: { generation: GenerationView; index?: number }) {
@@ -47,11 +48,15 @@ export function VideoCard({ generation, index = 0 }: { generation: GenerationVie
 }
 
 export function VideoGrid({ items }: { items: GenerationView[] }) {
+  const activeIds = items.filter((g) => g.status === "queued" || g.status === "processing").map((g) => g.id);
   return (
+    <>
+    <ActiveRefresher ids={activeIds} />
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((g, i) => (
         <VideoCard key={g.id} generation={g} index={i} />
       ))}
     </ul>
+    </>
   );
 }
