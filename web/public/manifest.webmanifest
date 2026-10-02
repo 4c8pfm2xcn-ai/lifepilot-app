@@ -1,0 +1,10 @@
+{
+  "name": "DAYZERO",
+  "short_name": "DAYZERO",
+  "description": "Everything, organized.",
+  "start_url": "/today",
+  "display": "standalone",
+  "background_color": "#0B0D0C",
+  "theme_color": "#0B0D0C",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

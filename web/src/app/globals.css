@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ─────────────────────────────────────────────────────────
+   Stored as RGB triplets so Tailwind can apply alpha. Dark is primary. */
+:root,
+[data-theme="dark"] {
+  --bg: 11 13 12;            /* #0B0D0C */
+  --surface: 18 22 20;       /* #121614 */
+  --card: 23 27 24;          /* #171B18 */
+  --elevated: 30 36 32;      /* #1E2420 */
+  --fg: 244 246 243;         /* #F4F6F3 */
+  --muted: 155 164 157;      /* #9BA49D */
+  --subtle: 111 121 113;     /* #6F7971 */
+  --accent: 183 243 107;     /* #B7F36B */
+  --accent-fg: 14 20 8;
+  --success: 128 217 155;    /* #80D99B */
+  --warning: 242 198 109;    /* #F2C66D */
+  --danger: 240 120 120;     /* #F07878 */
+  --line: 160 190 170;
+  --line-alpha: 0.09;
+  --line-strong-alpha: 0.16;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: 247 248 245;
+  --surface: 240 242 237;
+  --card: 255 255 255;
+  --elevated: 236 239 233;
+  --fg: 17 21 18;
+  --muted: 82 92 85;
+  --subtle: 120 130 122;
+  --accent: 74 128 18;       /* darker lime for contrast on light */
+  --accent-fg: 255 255 255;
+  --success: 34 139 74;
+  --warning: 168 112 10;
+  --danger: 200 54 54;
+  --line: 40 60 45;
+  --line-alpha: 0.1;
+  --line-strong-alpha: 0.18;
+  color-scheme: light;
+}
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    @apply bg-bg text-fg antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: rgb(var(--accent) / 0.28); }
+  :focus-visible { outline: 2px solid rgb(var(--accent) / 0.8); outline-offset: 2px; border-radius: 6px; }
+  input, textarea, select { font: inherit; }
+  [hidden] { display: none !important; }
+}
+
+@layer components {
+  .card { @apply rounded-xl border border-line bg-card; }
+  .hairline { @apply border-line; }
+  .label { @apply text-2xs font-medium uppercase tracking-[0.08em] text-subtle; }
+  .field {
+    @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-fg placeholder:text-subtle
+      transition-colors hover:border-line-strong focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20;
+  }
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ── FullCalendar theming ─────────────────────────────────────────────── */
+.fc {
+  --fc-border-color: rgb(var(--line) / var(--line-alpha));
+  --fc-page-bg-color: rgb(var(--card));
+  --fc-neutral-bg-color: rgb(var(--surface));
+  --fc-list-event-hover-bg-color: rgb(var(--elevated));
+  --fc-today-bg-color: rgb(var(--accent) / 0.045);
+  --fc-now-indicator-color: rgb(var(--accent));
+  --fc-event-border-color: transparent;
+  --fc-highlight-color: rgb(var(--accent) / 0.12);
+  --fc-non-business-color: rgb(var(--bg) / 0.45);
+  font-size: 0.8125rem;
+  color: rgb(var(--fg));
+}
+.fc .fc-scrollgrid { border-radius: 12px; overflow: hidden; }
+.fc .fc-col-header-cell-cushion,
+.fc .fc-daygrid-day-number { color: rgb(var(--muted)); font-weight: 500; padding: 6px 8px; }
+.fc .fc-timegrid-slot-label-cushion { color: rgb(var(--subtle)); font-size: 0.6875rem; }
+.fc .fc-timegrid-slot { height: 2.6em; }
+.fc .fc-day-today .fc-daygrid-day-number { color: rgb(var(--accent)); }
+.fc .fc-event { border-radius: 6px; padding: 1px 4px; cursor: pointer; font-weight: 500; }
+.fc .fc-event:focus-visible { outline: 2px solid rgb(var(--accent)); }
+.fc .dz-event { background: rgb(var(--elevated)); color: rgb(var(--fg)); border-left: 3px solid rgb(var(--muted)) !important; }
+.fc .dz-task { background: rgb(var(--accent) / 0.14); color: rgb(var(--fg)); border-left: 3px solid rgb(var(--accent)) !important; }
+.fc .dz-task-done { opacity: 0.5; text-decoration: line-through; }
+.fc .dz-deadline { background: rgb(var(--warning) / 0.14); color: rgb(var(--warning)); border-left: 3px solid rgb(var(--warning)) !important; }
+.fc .fc-daygrid-event-dot { display: none; }
+.fc .fc-list { border-radius: 12px; overflow: hidden; }
+.fc .fc-list-day-cushion { background: rgb(var(--surface)); color: rgb(var(--muted)); }
+.fc .fc-list-event-dot { border-color: rgb(var(--accent)); }
+.fc .fc-list-empty { background: rgb(var(--card)); color: rgb(var(--muted)); }
+.fc .fc-more-link { color: rgb(var(--muted)); }
+.fc .fc-popover { background: rgb(var(--elevated)); border-color: rgb(var(--line) / var(--line-strong-alpha)); border-radius: 10px; }
+.fc .fc-popover-header { background: transparent; }
