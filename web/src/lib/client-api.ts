@@ -1,6 +1,7 @@
 "use client";
 import { isSupabaseConfigured } from "./config";
 import { clientClock } from "./time";
+import { LocalApiError, localApi } from "./local-api";
 import type { CalendarEvent, Goal, GoalMilestone, InboxItem, Preferences, Task } from "./types";
 
 export class ApiError extends Error {
@@ -40,7 +41,17 @@ function snapshot(src: SnapshotSource) {
   };
 }
 
+export const isStaticPreview = process.env.NEXT_PUBLIC_STATIC_PREVIEW === "1";
+
 export async function postApi<T>(path: string, body: Record<string, unknown>, src?: SnapshotSource | null): Promise<T> {
+  if (isStaticPreview) {
+    try {
+      return (await localApi(path, body, clientClock(), src)) as T;
+    } catch (e) {
+      if (e instanceof LocalApiError) throw new ApiError(e.message, e.status, e.retryable);
+      throw e;
+    }
+  }
   let res: Response;
   try {
     res = await fetch(path, {

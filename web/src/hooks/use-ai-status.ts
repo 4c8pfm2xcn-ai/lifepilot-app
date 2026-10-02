@@ -12,6 +12,7 @@ let inflight: Promise<AIStatus> | null = null;
 
 export function fetchAIStatus() {
   if (cached) return Promise.resolve(cached);
+  if (process.env.NEXT_PUBLIC_STATIC_PREVIEW === "1") return Promise.resolve((cached = { ai: false, model: null, backend: "demo" }));
   inflight ??= fetch("/api/ai/status")
     .then((r) => r.json())
     .then((s: AIStatus) => (cached = s))
