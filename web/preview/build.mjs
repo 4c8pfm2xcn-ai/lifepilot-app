@@ -39,16 +39,30 @@ const result = await build({
   },
 });
 
-const js = result.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
-const css = readFileSync(path.join(dist, "app.css"), "utf8");
+writeFileSync(path.join(dist, "app.js"), result.outputFiles[0].text);
 const html = `<title>DAYZERO</title>
-<meta name="description" content="Everything, organized.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
-<style>:root{--font-geist-sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-geist-mono:"Geist Mono",ui-monospace,monospace}html,body{background:rgb(var(--bg));min-height:100%}${css}</style>
-<div id="dayzero-root"></div>
-<script>${js}</script>
+<style>
+:root{color-scheme:dark;--font-geist-sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-geist-mono:"Geist Mono",ui-monospace,monospace}
+html,body{background:#0B0D0C;color:#F4F6F3;min-height:100%;margin:0}
+#dz-boot{min-height:80vh;display:grid;place-items:center;font:500 14px/1.5 var(--font-geist-sans);color:#9BA49D;padding-inline:16px;text-align:center}
+#dz-boot b{display:block;color:#F4F6F3;font-size:18px;letter-spacing:.08em;margin-bottom:6px}
+#dz-boot .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#B7F36B;margin-right:8px;animation:p 1.2s ease-in-out infinite}
+@keyframes p{50%{opacity:.3}}
+</style>
+<link rel="stylesheet" href="app.css">
+<div id="dayzero-root"><div id="dz-boot"><div><b>DAYZERO</b><span class="dot"></span><span id="dz-boot-msg">Loading the app…</span></div></div></div>
+<script>
+window.addEventListener("error", function (e) {
+  var m = document.getElementById("dz-boot-msg");
+  if (m) m.textContent = "The app couldn't start: " + (e.message || "script failed to load") + ". Try reopening the page.";
+}, true);
+setTimeout(function () {
+  var m = document.getElementById("dz-boot-msg");
+  if (m) m.textContent = "Still loading… if this doesn't change, reopen the page.";
+}, 15000);
+</script>
+<script src="app.js"></script>
 `;
-writeFileSync(path.join(dist, "dayzero.html"), html);
-console.log(`preview/dist/dayzero.html  ${(html.length / 1024).toFixed(0)} KB`);
+writeFileSync(path.join(dist, "index.html"), html);
+console.log(`index.html ${(html.length / 1024).toFixed(1)} KB, app.js ${(result.outputFiles[0].text.length / 1024).toFixed(0)} KB, app.css ${(readFileSync(path.join(dist, "app.css")).length / 1024).toFixed(0)} KB`);

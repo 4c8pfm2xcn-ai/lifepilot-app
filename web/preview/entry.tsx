@@ -46,6 +46,26 @@ function Routes() {
   return <NotFound />;
 }
 
+// Some embedded viewers block localStorage; fall back to in-memory storage so the app still runs.
+try {
+  window.localStorage.getItem("dayzero:probe");
+} catch {
+  const mem = new Map<string, string>();
+  const fallback: Storage = {
+    get length() {
+      return mem.size;
+    },
+    key: (i) => Array.from(mem.keys())[i] ?? null,
+    getItem: (k) => (mem.has(k) ? mem.get(k)! : null),
+    setItem: (k, v) => void mem.set(k, String(v)),
+    removeItem: (k) => void mem.delete(k),
+    clear: () => mem.clear(),
+  };
+  try {
+    Object.defineProperty(window, "localStorage", { value: fallback, configurable: true });
+  } catch {}
+}
+
 try {
   const t = localStorage.getItem("dayzero:theme") || "dark";
   document.documentElement.dataset.theme = t === "system" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : t;
@@ -53,7 +73,9 @@ try {
   document.documentElement.dataset.theme = "dark";
 }
 
-createRoot(document.getElementById("dayzero-root")!).render(
+const rootEl = document.getElementById("dayzero-root")!;
+rootEl.innerHTML = "";
+createRoot(rootEl).render(
   <AuthProvider>
     <ToastProvider>
       <Routes />
