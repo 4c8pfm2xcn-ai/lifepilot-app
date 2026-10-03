@@ -20,6 +20,7 @@ export function MobileNav() {
 
   return (
     <>
+      {!pathname.startsWith("/assistant") && (
       <button
         onClick={() => ui.openCapture()}
         className="fixed bottom-[calc(72px+env(safe-area-inset-bottom))] right-4 z-30 grid h-14 w-14 place-items-center rounded-2xl bg-accent text-accent-fg shadow-pop transition active:scale-95 md:hidden"
@@ -28,6 +29,7 @@ export function MobileNav() {
       >
         <Plus className="h-6 w-6" strokeWidth={2.4} />
       </button>
+      )}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/90 pb-safe backdrop-blur-xl md:hidden" aria-label="Primary">
         <ul className="grid h-[60px] grid-cols-5">
           {NAV.filter((n) => PRIMARY.includes(n.href)).map((item) => {

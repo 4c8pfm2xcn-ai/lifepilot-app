@@ -129,7 +129,7 @@ export function AssistantScreen() {
   const proposedCount = (m: Message) => m.actions.filter((a) => a.status === "proposed").length;
 
   return (
-    <div className="flex h-[calc(100dvh-170px)] min-h-[480px] gap-5 md:h-[calc(100dvh-80px)]">
+    <div className="flex h-[calc(100dvh-250px)] min-h-[420px] gap-5 md:h-[calc(100dvh-80px)]">
       <aside className="hidden w-56 shrink-0 flex-col lg:flex" aria-label="Conversations">
         <Button variant="secondary" onClick={() => (setActiveId(null), setError(null), inputRef.current?.focus())} className="mb-3 justify-start">
           <MessageSquarePlus className="h-4 w-4" /> New conversation

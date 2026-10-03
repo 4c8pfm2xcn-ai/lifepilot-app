@@ -86,7 +86,7 @@ export async function loadSampleData(store: DataStore) {
       processing_status: "needs_review",
       resolution: null,
       error: null,
-      created_at: d(0, "08:05"),
+      created_at: new Date(Date.now() - 2 * 3600000).toISOString(),
       updated_at: now,
       extracted_data: {
         summary: "A message from Mia asking for the price list and confirming Saturday coffee.",

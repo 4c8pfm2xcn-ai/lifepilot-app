@@ -58,15 +58,15 @@ export function ExtractedItemRow({
 
   return (
     <li className={cn("rounded-lg border bg-surface", item.needs_confirmation ? "border-warning/30" : "border-line")} data-testid="extracted-item">
-      <div className="flex items-start gap-3 p-3">
-        <Select aria-label="Item type" value={item.kind} onChange={(e) => onPatch({ kind: e.target.value as ExtractedKind })} className="h-7 w-[88px] shrink-0 px-2 pr-6 text-xs">
+      <div className="flex flex-wrap items-start gap-x-3 gap-y-2 p-3 sm:flex-nowrap">
+        <Select aria-label="Item type" value={item.kind} onChange={(e) => onPatch({ kind: e.target.value as ExtractedKind })} className="order-2 h-7 w-[88px] shrink-0 px-2 pr-6 text-xs sm:order-none">
           {(Object.keys(KIND_LABEL) as ExtractedKind[]).map((k) => (
             <option key={k} value={k}>
               {KIND_LABEL[k]}
             </option>
           ))}
         </Select>
-        <div className="min-w-0 flex-1">
+        <div className="order-1 min-w-0 basis-[calc(100%-5.75rem)] sm:order-none sm:basis-auto sm:flex-1">
           <input aria-label="Title" value={item.title} onChange={(e) => onPatch({ title: e.target.value.slice(0, 200) })} className="w-full bg-transparent text-sm font-medium focus:outline-none" />
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-muted">
             {dateLabel ? <span className={cn(item.has_deadline && "text-warning")}>{item.has_deadline ? "Due " : ""}{dateLabel}</span> : <span className="text-subtle">No date</span>}
@@ -75,10 +75,10 @@ export function ExtractedItemRow({
             {item.estimated_minutes ? <span>{formatDuration(item.estimated_minutes)}</span> : null}
           </div>
         </div>
-        <button onClick={() => setEditing((e) => !e)} className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-subtle hover:bg-elevated hover:text-fg" aria-expanded={editing} aria-label="Edit details">
+        <button onClick={() => setEditing((e) => !e)} className="order-1 grid h-7 w-7 shrink-0 sm:order-none place-items-center rounded-md text-subtle hover:bg-elevated hover:text-fg" aria-expanded={editing} aria-label="Edit details">
           <ChevronDown className={cn("h-4 w-4 transition-transform", editing && "rotate-180")} />
         </button>
-        <button onClick={onDismiss} className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-subtle hover:bg-danger/10 hover:text-danger" aria-label={`Delete “${item.title}”`}>
+        <button onClick={onDismiss} className="order-1 grid h-7 w-7 shrink-0 sm:order-none place-items-center rounded-md text-subtle hover:bg-danger/10 hover:text-danger" aria-label={`Delete “${item.title}”`}>
           <X className="h-4 w-4" />
         </button>
       </div>
