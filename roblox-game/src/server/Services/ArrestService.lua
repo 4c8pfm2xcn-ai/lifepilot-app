@@ -134,10 +134,110 @@ function ArrestService.TryTase(cop)
 	end)
 end
 
+---------------------------------------------------------------------------
+-- Spike strips: thrown in front of the cop, they pop the tires of any
+-- criminal-driven car that rolls over them (big slowdown, no nitro).
+---------------------------------------------------------------------------
+local strips = {} -- [cop] = { Part = Part, Expires = number }
+local lastSpike = {}
+
+function ArrestService.PlaceSpikes(cop)
+	if cop.Team ~= TeamService.Teams.Police then
+		return
+	end
+	local now = os.clock()
+	if lastSpike[cop] and now - lastSpike[cop] < Config.SpikeCooldown then
+		Remotes.Notify(cop, ("Spike strip ready in %ds"):format(math.ceil(Config.SpikeCooldown - (now - lastSpike[cop]))), "info")
+		return
+	end
+	local root = rootOf(cop)
+	if not root then
+		return
+	end
+	lastSpike[cop] = now
+	if strips[cop] then
+		strips[cop].Part:Destroy()
+	end
+
+	local look = root.CFrame.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	flat = flat.Magnitude > 0.01 and flat.Unit or Vector3.zAxis
+	local position = Vector3.new(root.Position.X, 0.2, root.Position.Z) + flat * 10
+
+	local strip = Instance.new("Part")
+	strip.Name = "SpikeStrip"
+	strip.Anchored = true
+	strip.CanCollide = false
+	strip.Size = Vector3.new(26, 0.4, 3)
+	strip.CFrame = CFrame.lookAt(position, position + flat)
+	strip.Color = Color3.fromRGB(45, 45, 50)
+	strip.Material = Enum.Material.DiamondPlate
+	strip.Parent = workspace
+	for i = -6, 6 do
+		local spike = Instance.new("Part")
+		spike.Name = "Spike"
+		spike.Anchored = true
+		spike.CanCollide = false
+		spike.Size = Vector3.new(0.6, 0.8, 0.6)
+		spike.Color = Color3.fromRGB(255, 50, 50)
+		spike.Material = Enum.Material.Neon
+		spike.CFrame = strip.CFrame * CFrame.new(i * 2, 0.5, 0)
+		spike.Parent = strip
+	end
+	strips[cop] = { Part = strip, Expires = now + Config.SpikeLifetime }
+	Remotes.Notify(cop, "Spike strip deployed!", "info")
+end
+
+local function overStrip(strip, position)
+	local localPos = strip.CFrame:PointToObjectSpace(position)
+	return math.abs(localPos.X) <= strip.Size.X / 2 + 2 and math.abs(localPos.Z) <= 10 and localPos.Y < 10
+end
+
+local function tickSpikes()
+	local now = os.clock()
+	local serverNow = workspace:GetServerTimeNow()
+	for cop, info in pairs(strips) do
+		if now > info.Expires or not cop.Parent or not info.Part.Parent then
+			info.Part:Destroy()
+			strips[cop] = nil
+		else
+			for _, car in ipairs(workspace:GetChildren()) do
+				local body = car:IsA("Model") and car:GetAttribute("VehicleKey") and car.PrimaryPart
+				local seat = body and car:FindFirstChild("DriveSeat")
+				local occupant = seat and seat.Occupant
+				local driver = occupant and Players:GetPlayerFromCharacter(occupant.Parent)
+				if driver and driver.Team == TeamService.Teams.Criminal
+					and (body:GetAttribute("SpikedUntil") or 0) < serverNow
+					and overStrip(info.Part, body.Position) then
+					body:SetAttribute("SpikedUntil", serverNow + Config.SpikeDuration)
+					for _, d in ipairs(car:GetDescendants()) do
+						if d:IsA("Fire") and d.Name == "NitroFire" then
+							d.Enabled = false
+						end
+					end
+					Remotes.Notify(driver, "POP! Your tires got spiked!", "bad")
+					Remotes.Notify(cop, ("You spiked %s's car!"):format(driver.Name), "good")
+				end
+			end
+		end
+	end
+end
+
 function ArrestService.Init()
 	Players.PlayerRemoving:Connect(function(player)
 		lastCuff[player] = nil
 		lastTase[player] = nil
+		lastSpike[player] = nil
+		if strips[player] then
+			strips[player].Part:Destroy()
+			strips[player] = nil
+		end
+	end)
+	task.spawn(function()
+		while true do
+			task.wait(0.1)
+			tickSpikes()
+		end
 	end)
 end
 

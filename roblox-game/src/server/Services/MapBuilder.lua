@@ -8,6 +8,9 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 
 local MapBuilder = {}
 
+-- Foot of the one-way mega ramp (beside the south road, launching east)
+MapBuilder.MegaRampStart = Vector3.new(-300, 0, -118)
+
 local function part(props)
 	local p = Instance.new("Part")
 	p.Anchored = true
@@ -122,6 +125,57 @@ local function tree(parent, position)
 	leaves.Shape = Enum.PartType.Ball
 end
 
+
+-- Tilted slab whose top surface starts at ground level and rises along `dir`
+local RAMP_WIDTH = 30
+local function rampSlab(parent, footCenter, dir, length, angleDeg, color)
+	local theta = math.rad(angleDeg)
+	local thickness = 2
+	local yaw = math.atan2(dir.X, dir.Z)
+	local centerHeight = (length / 2) * math.sin(theta) - (thickness / 2) * math.cos(theta)
+	local horizontal = (length / 2) * math.cos(theta)
+	local center = footCenter + dir * horizontal + Vector3.new(0, centerHeight, 0)
+	return part({
+		Parent = parent, Name = "Ramp", Size = Vector3.new(RAMP_WIDTH, thickness, length),
+		CFrame = CFrame.new(center) * CFrame.Angles(0, yaw, 0) * CFrame.Angles(-theta, 0, 0),
+		Color = color, Material = Enum.Material.DiamondPlate,
+	})
+end
+
+-- Two slabs back to back: a jump hump you can hit from either direction
+local function hump(parent, center, alongX)
+	local dir = alongX and Vector3.xAxis or Vector3.zAxis
+	local length, angle = 26, 24
+	local run = length * math.cos(math.rad(angle))
+	rampSlab(parent, center - dir * run, dir, length, angle, Color3.fromRGB(255, 170, 30))
+	rampSlab(parent, center + dir * run, -dir, length, angle, Color3.fromRGB(255, 170, 30))
+end
+
+local function boostPad(parent, center, alongX)
+	return part({
+		Parent = parent, Name = "BoostPad",
+		Size = alongX and Vector3.new(20, 0.2, 14) or Vector3.new(14, 0.2, 20),
+		Position = center + Vector3.new(0, 0.12, 0),
+		Color = Color3.fromRGB(0, 230, 255), Material = Enum.Material.Neon, Transparency = 0.15, CanCollide = false,
+	})
+end
+
+local function lamp(parent, position)
+	part({
+		Parent = parent, Name = "LampPost", Size = Vector3.new(0.8, 16, 0.8), Position = position + Vector3.new(0, 8, 0),
+		Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Metal,
+	})
+	local head = part({
+		Parent = parent, Name = "LampHead", Size = Vector3.new(2.4, 0.8, 2.4), Position = position + Vector3.new(0, 16.4, 0),
+		Color = Color3.fromRGB(255, 230, 170), Material = Enum.Material.Neon, CanCollide = false,
+	})
+	local light = Instance.new("PointLight")
+	light.Range = 40
+	light.Brightness = 1.4
+	light.Color = Color3.fromRGB(255, 220, 160)
+	light.Parent = head
+end
+
 function MapBuilder.Build()
 	-- Remove the default Studio template parts so they don't clash with the city
 	for _, name in ipairs({ "Baseplate", "SpawnLocation" }) do
@@ -146,6 +200,19 @@ function MapBuilder.Build()
 	Lighting.ClockTime = 14.5
 	Lighting.Brightness = 2
 	Lighting.OutdoorAmbient = Color3.fromRGB(140, 140, 150)
+	if not Lighting:FindFirstChild("CityBloom") then
+		local bloom = Instance.new("BloomEffect")
+		bloom.Name = "CityBloom"
+		bloom.Intensity = 0.8
+		bloom.Size = 30
+		bloom.Threshold = 0.9
+		bloom.Parent = Lighting
+		local color = Instance.new("ColorCorrectionEffect")
+		color.Name = "CityColor"
+		color.Saturation = 0.15
+		color.Contrast = 0.08
+		color.Parent = Lighting
+	end
 
 	-- Ground + invisible border walls
 	part({
@@ -175,6 +242,62 @@ function MapBuilder.Build()
 		decal(roads, "Road", Vector3.new(0, 0.01, z), Config.MapSize, 30, asphalt, Enum.Material.Asphalt)
 	end
 
+	-- Where cash drops can land (road intersections and open streets)
+	map.DropSpots = {}
+	for _, x in ipairs(roadXs) do
+		for _, z in ipairs(roadZs) do
+			table.insert(map.DropSpots, Vector3.new(x, 0, z))
+		end
+	end
+	for _, spot in ipairs({
+		Vector3.new(-300, 0, 40), Vector3.new(300, 0, 40), Vector3.new(0, 0, 160),
+		Vector3.new(250, 0, 160), Vector3.new(-250, 0, -150), Vector3.new(-120, 0, 330), Vector3.new(100, 0, -330),
+	}) do
+		table.insert(map.DropSpots, spot)
+	end
+
+	-- Street lamps along every road
+	local lamps = Instance.new("Folder")
+	lamps.Name = "Lamps"
+	lamps.Parent = city
+	for i = -4, 4 do
+		local t = i * 90 + 45
+		for _, x in ipairs(roadXs) do
+			lamp(lamps, Vector3.new(x + 18, 0, t))
+		end
+		for _, z in ipairs(roadZs) do
+			lamp(lamps, Vector3.new(t, 0, z - 18))
+		end
+	end
+
+	-- Stunt humps on the roads, a one-way MEGA RAMP, and boost pads
+	local stunts = Instance.new("Folder")
+	stunts.Name = "Stunts"
+	stunts.Parent = city
+	hump(stunts, Vector3.new(-120, 0, -320), false)
+	hump(stunts, Vector3.new(100, 0, 300), false)
+	hump(stunts, Vector3.new(320, 0, 40), true)
+	hump(stunts, Vector3.new(-230, 0, 160), true)
+	hump(stunts, Vector3.new(230, 0, -150), true)
+	local megaStart = MapBuilder.MegaRampStart
+	local mega = rampSlab(stunts, megaStart, Vector3.xAxis, 60, 22, Color3.fromRGB(255, 60, 140))
+	mega.Name = "MegaRamp"
+	sign(stunts, megaStart + Vector3.new(30, 34, 0), "MEGA RAMP", Color3.fromRGB(255, 120, 200))
+
+	local boostFolder = Instance.new("Folder")
+	boostFolder.Name = "BoostPads"
+	boostFolder.Parent = city
+	for _, info in ipairs({
+		{ Vector3.new(-120, 0, -40), false }, { Vector3.new(100, 0, -60), false },
+		{ Vector3.new(-120, 0, 260), false }, { Vector3.new(100, 0, 180 + 40), false },
+		{ Vector3.new(-60, 0, 40), true }, { Vector3.new(220, 0, 40), true },
+		{ Vector3.new(0, 0, 160), true }, { Vector3.new(-260, 0, -150), true },
+		{ MapBuilder.MegaRampStart - Vector3.new(14, 0, 0), true },
+	}) do
+		boostPad(boostFolder, info[1], info[2])
+	end
+	map.BoostPads = boostFolder
+
 	-- Robbery targets
 	for _, rob in ipairs(Config.Robberies) do
 		local model = building(city, rob.Name, rob.Position, rob.Size, rob.Color, 14)
@@ -203,6 +326,8 @@ function MapBuilder.Build()
 	map.Spawns.Police = CFrame.new(ps + Vector3.new(0, 3, 0))
 	vehiclePad(city, ps + Vector3.new(-20, 0, 45), 0, "Cruiser", map.VehiclePads)
 	vehiclePad(city, ps + Vector3.new(20, 0, 45), 0, "Interceptor", map.VehiclePads)
+	vehiclePad(city, ps + Vector3.new(-20, 0, 75), 0, "Thunder", map.VehiclePads)
+	vehiclePad(city, ps + Vector3.new(20, 0, 75), 0, "SkyPatrol", map.VehiclePads)
 
 	-- Jail: tall solid walls, cells inside, and a secret vent for breakouts
 	local jp = L.Jail
@@ -238,6 +363,27 @@ function MapBuilder.Build()
 	vehiclePad(city, hp + Vector3.new(-15, 0, 50), 0, "Muscle", map.VehiclePads)
 	vehiclePad(city, hp + Vector3.new(10, 0, 50), 0, "Supercar", map.VehiclePads)
 
+	-- Insane Motors: the dealership for the wild stuff
+	local dp = L.Dealership
+	local showroom = Instance.new("Model")
+	showroom.Name = "Insane Motors"
+	showroom.Parent = city
+	decal(showroom, "Showroom", dp, 150, 70, Color3.fromRGB(30, 30, 40), Enum.Material.Marble)
+	for _, x in ipairs({ -75, 75 }) do
+		part({
+			Parent = showroom, Name = "Pillar", Size = Vector3.new(3, 24, 3), Position = dp + Vector3.new(x, 12, -36),
+			Color = Color3.fromRGB(255, 60, 140), Material = Enum.Material.Neon,
+		})
+	end
+	part({
+		Parent = showroom, Name = "Arch", Size = Vector3.new(153, 3, 3), Position = dp + Vector3.new(0, 25, -36),
+		Color = Color3.fromRGB(255, 60, 140), Material = Enum.Material.Neon,
+	})
+	sign(showroom, dp + Vector3.new(0, 32, -36), "INSANE MOTORS", Color3.fromRGB(255, 120, 200))
+	for i, key in ipairs({ "Monster", "Rocket", "Hyperion", "SkyRider" }) do
+		vehiclePad(showroom, dp + Vector3.new(-54 + (i - 1) * 34, 0, 5), 0, key, map.VehiclePads)
+	end
+
 	-- Global leaderboard board next to the hideout
 	local boardPart = part({
 		Parent = city, Name = "Leaderboard", Size = Vector3.new(24, 16, 1),
@@ -269,7 +415,7 @@ function MapBuilder.Build()
 
 	-- Filler buildings + trees for a city feel (deterministic layout)
 	local rng = Random.new(1337)
-	local keyPoints = { L.PoliceStation, L.Jail, L.Hideout }
+	local keyPoints = { L.PoliceStation, L.Jail, L.Hideout, L.Dealership, L.Dealership + Vector3.new(-60, 0, 0), L.Dealership + Vector3.new(60, 0, 0), MapBuilder.MegaRampStart + Vector3.new(30, 0, 0) }
 	for _, rob in ipairs(Config.Robberies) do
 		table.insert(keyPoints, rob.Position)
 	end

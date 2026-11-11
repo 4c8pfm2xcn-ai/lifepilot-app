@@ -97,19 +97,55 @@ Config.Locations = {
 	PoliceStation = Vector3.new(0, 0, -260),
 	Jail = Vector3.new(260, 0, -260),
 	Hideout = Vector3.new(-300, 0, 260),
+	Dealership = Vector3.new(-300, 0, -300),
 }
 Config.MapSize = 900
 
 ---------------------------------------------------------------------------
 -- Vehicles (speeds in studs/second; players walk at 16)
 ---------------------------------------------------------------------------
+-- Style picks the body shape: Car, Hyper, Monster, Kart or Flyer.
+-- Glow is the underglow color (looks amazing at night).
+-- Fly = true makes it a flying car (E = up, Q = down).
 Config.Vehicles = {
-	Sedan = { Display = "Street Sedan", Price = 0, MaxSpeed = 70, TurnRate = 1.9, Color = Color3.fromRGB(80, 85, 95), Team = nil },
-	Muscle = { Display = "Muscle Car", Price = 4000, MaxSpeed = 95, TurnRate = 1.8, Color = Color3.fromRGB(200, 60, 40), Team = nil },
-	Supercar = { Display = "Supercar", Price = 15000, MaxSpeed = 125, TurnRate = 1.7, Color = Color3.fromRGB(250, 200, 30), Team = nil },
-	Cruiser = { Display = "Police Cruiser", Price = 0, MaxSpeed = 95, TurnRate = 1.9, Color = Color3.fromRGB(30, 50, 120), Team = "Police", Police = true },
-	Interceptor = { Display = "Police Interceptor", Price = 8000, MaxSpeed = 125, TurnRate = 1.8, Color = Color3.fromRGB(20, 20, 25), Team = "Police", Police = true },
+	-- Everyone (Hideout)
+	Sedan = { Display = "Street Sedan", Price = 0, MaxSpeed = 70, TurnRate = 1.9, Style = "Car", Color = Color3.fromRGB(80, 85, 95), Glow = Color3.fromRGB(120, 160, 255) },
+	Muscle = { Display = "Muscle Car", Price = 4000, MaxSpeed = 95, TurnRate = 1.8, Style = "Car", Color = Color3.fromRGB(200, 60, 40), Glow = Color3.fromRGB(255, 120, 40) },
+	Supercar = { Display = "Supercar", Price = 15000, MaxSpeed = 125, TurnRate = 1.7, Style = "Hyper", Color = Color3.fromRGB(250, 200, 30), Glow = Color3.fromRGB(255, 230, 80) },
+	-- Insane Motors dealership
+	Monster = { Display = "Monster Truck", Price = 20000, MaxSpeed = 95, TurnRate = 1.6, Style = "Monster", Color = Color3.fromRGB(60, 200, 80), Glow = Color3.fromRGB(80, 255, 120) },
+	Rocket = { Display = "Rocket Kart", Price = 30000, MaxSpeed = 150, TurnRate = 2.5, Style = "Kart", Color = Color3.fromRGB(255, 90, 20), Glow = Color3.fromRGB(255, 60, 0), AlwaysFlames = true },
+	Hyperion = { Display = "Hyperion X", Price = 50000, MaxSpeed = 180, TurnRate = 1.6, Style = "Hyper", Color = Color3.fromRGB(150, 40, 255), Glow = Color3.fromRGB(200, 80, 255) },
+	SkyRider = { Display = "SkyRider (flies!)", Price = 75000, MaxSpeed = 120, TurnRate = 1.8, Style = "Flyer", Color = Color3.fromRGB(30, 200, 230), Glow = Color3.fromRGB(0, 255, 255), Fly = true },
+	-- Police only (Police Station)
+	Cruiser = { Display = "Police Cruiser", Price = 0, MaxSpeed = 95, TurnRate = 1.9, Style = "Car", Color = Color3.fromRGB(30, 50, 120), Glow = Color3.fromRGB(60, 100, 255), Team = "Police", Police = true },
+	Interceptor = { Display = "Police Interceptor", Price = 8000, MaxSpeed = 125, TurnRate = 1.8, Style = "Car", Color = Color3.fromRGB(20, 20, 25), Glow = Color3.fromRGB(60, 100, 255), Team = "Police", Police = true },
+	Thunder = { Display = "Thunder Pursuit", Price = 40000, MaxSpeed = 175, TurnRate = 1.7, Style = "Hyper", Color = Color3.fromRGB(15, 25, 60), Glow = Color3.fromRGB(80, 140, 255), Team = "Police", Police = true },
+	SkyPatrol = { Display = "Sky Patrol (flies!)", Price = 60000, MaxSpeed = 120, TurnRate = 1.8, Style = "Flyer", Color = Color3.fromRGB(240, 240, 250), Glow = Color3.fromRGB(80, 140, 255), Team = "Police", Police = true, Fly = true },
 }
+
+-- Nitro: hold F (or the NITRO button). Fuel drains while used, then recharges.
+Config.Nitro = { Multiplier = 1.6, Duration = 3, Recharge = 7 }
+Config.BoostPadMultiplier = 1.8
+Config.FlySpeedVertical = 45
+Config.FlyMaxAltitude = 300
+
+-- Airtime off ramps pays cash: StuntCashPerSecond per second in the air
+Config.StuntMinAirtime = 0.7
+Config.StuntCashPerSecond = 80
+Config.StuntMaxCash = 400
+
+-- Police spike strips slow criminal cars that drive over them
+Config.SpikeCooldown = 12
+Config.SpikeLifetime = 25
+Config.SpikeSlowdown = 0.35 -- car top speed multiplier while spiked
+Config.SpikeDuration = 6
+
+-- Cash drops fall from the sky; first player to reach the crate wins
+Config.CashDrop = { Interval = 150, FallTime = 12, Lifetime = 90, Min = 400, Max = 1200 }
+
+-- Full day/night cycle length (neon and underglow shine at night)
+Config.DayLengthMinutes = 12
 
 ---------------------------------------------------------------------------
 -- Monetization. Create these in the Creator Dashboard, then paste the IDs.
@@ -126,7 +162,7 @@ Config.CashProducts = {
 }
 
 return Config
-]]></ProtectedString></Properties></Item></Item></Item><Item class="ServerScriptService" referent="RBX00000012"><Properties><string name="Name">ServerScriptService</string></Properties><Item class="Folder" referent="RBX00000011"><Properties><string name="Name">Server</string></Properties><Item class="Script" referent="RBX00000005"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Getaway City - server entry point. Builds the map and starts every service.
+]]></ProtectedString></Properties></Item></Item></Item><Item class="ServerScriptService" referent="RBX00000013"><Properties><string name="Name">ServerScriptService</string></Properties><Item class="Folder" referent="RBX00000012"><Properties><string name="Name">Server</string></Properties><Item class="Script" referent="RBX00000005"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Getaway City - server entry point. Builds the map and starts every service.
 local Services = script.Parent:WaitForChild("Services")
 
 local Remotes = require(Services.Remotes)
@@ -139,6 +175,7 @@ local ArrestService = require(Services.ArrestService)
 local ToolService = require(Services.ToolService)
 local RobberyService = require(Services.RobberyService)
 local VehicleService = require(Services.VehicleService)
+local FunService = require(Services.FunService)
 
 local _ = Remotes -- created on require so clients can find them immediately
 
@@ -151,11 +188,12 @@ JailService.Init(map)
 ArrestService.Init()
 RobberyService.Init(map)
 VehicleService.Init(map)
+FunService.Init(map)
 
 TeamService.OnCharacterSpawned(ToolService.GiveTools)
 
 print("[Getaway City] Server ready")
-]]></ProtectedString></Properties></Item><Item class="Folder" referent="RBX00000010"><Properties><string name="Name">Services</string></Properties><Item class="ModuleScript" referent="RBX00000006"><Properties><string name="Name">ArrestService</string><ProtectedString name="Source"><![CDATA[-- Police actions: handcuff arrests and taser stuns. All checks are server-side.
+]]></ProtectedString></Properties></Item><Item class="Folder" referent="RBX00000011"><Properties><string name="Name">Services</string></Properties><Item class="ModuleScript" referent="RBX00000006"><Properties><string name="Name">ArrestService</string><ProtectedString name="Source"><![CDATA[-- Police actions: handcuff arrests and taser stuns. All checks are server-side.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Debris = game:GetService("Debris")
@@ -291,10 +329,110 @@ function ArrestService.TryTase(cop)
 	end)
 end
 
+---------------------------------------------------------------------------
+-- Spike strips: thrown in front of the cop, they pop the tires of any
+-- criminal-driven car that rolls over them (big slowdown, no nitro).
+---------------------------------------------------------------------------
+local strips = {} -- [cop] = { Part = Part, Expires = number }
+local lastSpike = {}
+
+function ArrestService.PlaceSpikes(cop)
+	if cop.Team ~= TeamService.Teams.Police then
+		return
+	end
+	local now = os.clock()
+	if lastSpike[cop] and now - lastSpike[cop] < Config.SpikeCooldown then
+		Remotes.Notify(cop, ("Spike strip ready in %ds"):format(math.ceil(Config.SpikeCooldown - (now - lastSpike[cop]))), "info")
+		return
+	end
+	local root = rootOf(cop)
+	if not root then
+		return
+	end
+	lastSpike[cop] = now
+	if strips[cop] then
+		strips[cop].Part:Destroy()
+	end
+
+	local look = root.CFrame.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	flat = flat.Magnitude > 0.01 and flat.Unit or Vector3.zAxis
+	local position = Vector3.new(root.Position.X, 0.2, root.Position.Z) + flat * 10
+
+	local strip = Instance.new("Part")
+	strip.Name = "SpikeStrip"
+	strip.Anchored = true
+	strip.CanCollide = false
+	strip.Size = Vector3.new(26, 0.4, 3)
+	strip.CFrame = CFrame.lookAt(position, position + flat)
+	strip.Color = Color3.fromRGB(45, 45, 50)
+	strip.Material = Enum.Material.DiamondPlate
+	strip.Parent = workspace
+	for i = -6, 6 do
+		local spike = Instance.new("Part")
+		spike.Name = "Spike"
+		spike.Anchored = true
+		spike.CanCollide = false
+		spike.Size = Vector3.new(0.6, 0.8, 0.6)
+		spike.Color = Color3.fromRGB(255, 50, 50)
+		spike.Material = Enum.Material.Neon
+		spike.CFrame = strip.CFrame * CFrame.new(i * 2, 0.5, 0)
+		spike.Parent = strip
+	end
+	strips[cop] = { Part = strip, Expires = now + Config.SpikeLifetime }
+	Remotes.Notify(cop, "Spike strip deployed!", "info")
+end
+
+local function overStrip(strip, position)
+	local localPos = strip.CFrame:PointToObjectSpace(position)
+	return math.abs(localPos.X) <= strip.Size.X / 2 + 2 and math.abs(localPos.Z) <= 10 and localPos.Y < 10
+end
+
+local function tickSpikes()
+	local now = os.clock()
+	local serverNow = workspace:GetServerTimeNow()
+	for cop, info in pairs(strips) do
+		if now > info.Expires or not cop.Parent or not info.Part.Parent then
+			info.Part:Destroy()
+			strips[cop] = nil
+		else
+			for _, car in ipairs(workspace:GetChildren()) do
+				local body = car:IsA("Model") and car:GetAttribute("VehicleKey") and car.PrimaryPart
+				local seat = body and car:FindFirstChild("DriveSeat")
+				local occupant = seat and seat.Occupant
+				local driver = occupant and Players:GetPlayerFromCharacter(occupant.Parent)
+				if driver and driver.Team == TeamService.Teams.Criminal
+					and (body:GetAttribute("SpikedUntil") or 0) < serverNow
+					and overStrip(info.Part, body.Position) then
+					body:SetAttribute("SpikedUntil", serverNow + Config.SpikeDuration)
+					for _, d in ipairs(car:GetDescendants()) do
+						if d:IsA("Fire") and d.Name == "NitroFire" then
+							d.Enabled = false
+						end
+					end
+					Remotes.Notify(driver, "POP! Your tires got spiked!", "bad")
+					Remotes.Notify(cop, ("You spiked %s's car!"):format(driver.Name), "good")
+				end
+			end
+		end
+	end
+end
+
 function ArrestService.Init()
 	Players.PlayerRemoving:Connect(function(player)
 		lastCuff[player] = nil
 		lastTase[player] = nil
+		lastSpike[player] = nil
+		if strips[player] then
+			strips[player].Part:Destroy()
+			strips[player] = nil
+		end
+	end)
+	task.spawn(function()
+		while true do
+			task.wait(0.1)
+			tickSpikes()
+		end
 	end)
 end
 
@@ -608,7 +746,209 @@ function DataService.Init(map)
 end
 
 return DataService
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000008"><Properties><string name="Name">JailService</string><ProtectedString name="Source"><![CDATA[-- Jail time, automatic release and secret-vent breakouts.
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000008"><Properties><string name="Name">FunService</string><ProtectedString name="Source"><![CDATA[-- The extra-fun systems:
+--   * Stunt cash: big air off ramps pays out (measured on the server)
+--   * Cash drops: a crate parachutes into the city; first player to reach it wins
+--   * Day/night cycle: neon, street lamps and car underglow shine at night
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+local DataService = require(script.Parent.DataService)
+local VehicleService = require(script.Parent.VehicleService)
+
+local FunService = {}
+
+---------------------------------------------------------------------------
+-- Stunts
+---------------------------------------------------------------------------
+local air = {} -- [car Model] = { Start = clock, Driver = Player }
+
+local function driverOf(car)
+	local seat = car:FindFirstChild("DriveSeat")
+	local occupant = seat and seat.Occupant
+	return occupant and Players:GetPlayerFromCharacter(occupant.Parent)
+end
+
+local function tickStunts()
+	local now = os.clock()
+	for _, car in pairs(VehicleService.GetCars()) do
+		local body = car.PrimaryPart
+		if body and car.Parent and not car:GetAttribute("Fly") then
+			local height = body.Position.Y - (car:GetAttribute("RideHeight") or 1)
+			local state = air[car]
+			if height > 4 then
+				if not state then
+					air[car] = { Start = now, Driver = driverOf(car) }
+				end
+			elseif state and height < 1.5 then
+				air[car] = nil
+				local airtime = now - state.Start
+				local driver = state.Driver
+				if driver and driver.Parent and driverOf(car) == driver and airtime >= Config.StuntMinAirtime then
+					local cash = math.min(Config.StuntMaxCash, math.floor(airtime * Config.StuntCashPerSecond)) * DataService.Multiplier(driver)
+					DataService.AddCash(driver, cash)
+					local label = airtime >= 2 and "INSANE STUNT!" or (airtime >= 1.3 and "BIG AIR!" or "STUNT!")
+					Remotes.Notify(driver, ("%s %.1fs airtime  +$%d"):format(label, airtime, cash), "good")
+				end
+			end
+		end
+	end
+	for car in pairs(air) do
+		if not car.Parent then
+			air[car] = nil
+		end
+	end
+end
+
+---------------------------------------------------------------------------
+-- Cash drops
+---------------------------------------------------------------------------
+local landmarks = {}
+local dropSpots = {}
+
+local function nearestLandmark(position)
+	local bestName, bestDist = "the city", math.huge
+	for _, mark in ipairs(landmarks) do
+		local d = (mark.Position - position).Magnitude
+		if d < bestDist then
+			bestName, bestDist = mark.Name, d
+		end
+	end
+	return bestName
+end
+
+local function spawnDrop()
+	local spot = dropSpots[math.random(1, #dropSpots)] + Vector3.new(math.random(-12, 12), 0, math.random(-12, 12))
+	local reward = math.random(Config.CashDrop.Min, Config.CashDrop.Max)
+
+	local crate = Instance.new("Part")
+	crate.Name = "CashDrop"
+	crate.Size = Vector3.new(5, 5, 5)
+	crate.Anchored = true
+	crate.CanCollide = false
+	crate.Material = Enum.Material.Neon
+	crate.Color = Color3.fromRGB(255, 210, 60)
+	crate.CFrame = CFrame.new(spot + Vector3.new(0, 220, 0))
+	crate.Parent = workspace
+
+	local chute = Instance.new("Part")
+	chute.Name = "Parachute"
+	chute.Size = Vector3.new(16, 1, 16)
+	chute.Anchored = true
+	chute.CanCollide = false
+	chute.Color = Color3.fromRGB(240, 60, 60)
+	chute.Material = Enum.Material.Fabric
+	chute.CFrame = crate.CFrame * CFrame.new(0, 12, 0)
+	chute.Parent = crate
+
+	local beacon = Instance.new("PointLight")
+	beacon.Range = 30
+	beacon.Brightness = 4
+	beacon.Color = Color3.fromRGB(255, 210, 60)
+	beacon.Parent = crate
+
+	local gui = Instance.new("BillboardGui")
+	gui.Size = UDim2.new(0, 120, 0, 40)
+	gui.StudsOffset = Vector3.new(0, 6, 0)
+	gui.AlwaysOnTop = true
+	gui.MaxDistance = 3000
+	gui.Parent = crate
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.fromScale(1, 1)
+	text.BackgroundTransparency = 1
+	text.Text = "$" .. reward
+	text.TextColor3 = Color3.fromRGB(255, 220, 80)
+	text.TextStrokeTransparency = 0
+	text.Font = Enum.Font.GothamBlack
+	text.TextScaled = true
+	text.Parent = gui
+
+	local landing = CFrame.new(spot + Vector3.new(0, 2.5, 0))
+	local info = TweenInfo.new(Config.CashDrop.FallTime, Enum.EasingStyle.Linear)
+	TweenService:Create(crate, info, { CFrame = landing }):Play()
+	TweenService:Create(chute, info, { CFrame = landing * CFrame.new(0, 12, 0) }):Play()
+	task.delay(Config.CashDrop.FallTime, function()
+		if chute.Parent then
+			chute:Destroy()
+		end
+	end)
+
+	Remotes.NotifyAll(("CASH DROP! $%d is falling near %s. Go go go!"):format(reward, nearestLandmark(spot)), "alarm")
+
+	local expires = os.clock() + Config.CashDrop.FallTime + Config.CashDrop.Lifetime
+	task.spawn(function()
+		while crate.Parent and os.clock() < expires do
+			task.wait(0.2)
+			if crate.Position.Y < 14 then
+				for _, player in ipairs(Players:GetPlayers()) do
+					local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+					if root and (root.Position - crate.Position).Magnitude < 10 then
+						local amount = reward * DataService.Multiplier(player)
+						DataService.AddCash(player, amount)
+						Remotes.NotifyAll(("%s grabbed the cash drop (+$%d)!"):format(player.Name, amount), "good")
+						crate:Destroy()
+						return
+					end
+				end
+			end
+		end
+		if crate.Parent then
+			crate:Destroy()
+		end
+	end)
+end
+
+---------------------------------------------------------------------------
+-- Init
+---------------------------------------------------------------------------
+function FunService.Init(map)
+	local L = Config.Locations
+	landmarks = {
+		{ Name = "the Police Station", Position = L.PoliceStation },
+		{ Name = "the Jail", Position = L.Jail },
+		{ Name = "the Hideout", Position = L.Hideout },
+		{ Name = "Insane Motors", Position = L.Dealership },
+	}
+	for _, rob in ipairs(Config.Robberies) do
+		table.insert(landmarks, { Name = rob.Name, Position = rob.Position })
+	end
+	dropSpots = map.DropSpots
+
+	-- Stunt tracking
+	task.spawn(function()
+		while true do
+			task.wait(0.1)
+			tickStunts()
+		end
+	end)
+
+	-- Cash drops
+	task.spawn(function()
+		while true do
+			task.wait(Config.CashDrop.Interval)
+			if #Players:GetPlayers() > 0 then
+				spawnDrop()
+			end
+		end
+	end)
+
+	-- Day/night: start at golden hour so new players see the neon kick in
+	Lighting.ClockTime = 16.5
+	local hoursPerSecond = 24 / (Config.DayLengthMinutes * 60)
+	task.spawn(function()
+		while true do
+			local dt = task.wait(0.5)
+			Lighting.ClockTime = (Lighting.ClockTime + dt * hoursPerSecond) % 24
+		end
+	end)
+end
+
+return FunService
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000009"><Properties><string name="Name">JailService</string><ProtectedString name="Source"><![CDATA[-- Jail time, automatic release and secret-vent breakouts.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -691,7 +1031,7 @@ function JailService.Init(map)
 end
 
 return JailService
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000009"><Properties><string name="Name">MapBuilder</string><ProtectedString name="Source"><![CDATA[-- Builds the whole city from code so the game works in an empty place.
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000A"><Properties><string name="Name">MapBuilder</string><ProtectedString name="Source"><![CDATA[-- Builds the whole city from code so the game works in an empty place.
 -- Feel free to replace any of this with a hand-built map later: the rest of
 -- the game only needs the markers returned by MapBuilder.Build().
 local Lighting = game:GetService("Lighting")
@@ -700,6 +1040,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 
 local MapBuilder = {}
+
+-- Foot of the one-way mega ramp (beside the south road, launching east)
+MapBuilder.MegaRampStart = Vector3.new(-300, 0, -118)
 
 local function part(props)
 	local p = Instance.new("Part")
@@ -815,6 +1158,57 @@ local function tree(parent, position)
 	leaves.Shape = Enum.PartType.Ball
 end
 
+
+-- Tilted slab whose top surface starts at ground level and rises along `dir`
+local RAMP_WIDTH = 30
+local function rampSlab(parent, footCenter, dir, length, angleDeg, color)
+	local theta = math.rad(angleDeg)
+	local thickness = 2
+	local yaw = math.atan2(dir.X, dir.Z)
+	local centerHeight = (length / 2) * math.sin(theta) - (thickness / 2) * math.cos(theta)
+	local horizontal = (length / 2) * math.cos(theta)
+	local center = footCenter + dir * horizontal + Vector3.new(0, centerHeight, 0)
+	return part({
+		Parent = parent, Name = "Ramp", Size = Vector3.new(RAMP_WIDTH, thickness, length),
+		CFrame = CFrame.new(center) * CFrame.Angles(0, yaw, 0) * CFrame.Angles(-theta, 0, 0),
+		Color = color, Material = Enum.Material.DiamondPlate,
+	})
+end
+
+-- Two slabs back to back: a jump hump you can hit from either direction
+local function hump(parent, center, alongX)
+	local dir = alongX and Vector3.xAxis or Vector3.zAxis
+	local length, angle = 26, 24
+	local run = length * math.cos(math.rad(angle))
+	rampSlab(parent, center - dir * run, dir, length, angle, Color3.fromRGB(255, 170, 30))
+	rampSlab(parent, center + dir * run, -dir, length, angle, Color3.fromRGB(255, 170, 30))
+end
+
+local function boostPad(parent, center, alongX)
+	return part({
+		Parent = parent, Name = "BoostPad",
+		Size = alongX and Vector3.new(20, 0.2, 14) or Vector3.new(14, 0.2, 20),
+		Position = center + Vector3.new(0, 0.12, 0),
+		Color = Color3.fromRGB(0, 230, 255), Material = Enum.Material.Neon, Transparency = 0.15, CanCollide = false,
+	})
+end
+
+local function lamp(parent, position)
+	part({
+		Parent = parent, Name = "LampPost", Size = Vector3.new(0.8, 16, 0.8), Position = position + Vector3.new(0, 8, 0),
+		Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Metal,
+	})
+	local head = part({
+		Parent = parent, Name = "LampHead", Size = Vector3.new(2.4, 0.8, 2.4), Position = position + Vector3.new(0, 16.4, 0),
+		Color = Color3.fromRGB(255, 230, 170), Material = Enum.Material.Neon, CanCollide = false,
+	})
+	local light = Instance.new("PointLight")
+	light.Range = 40
+	light.Brightness = 1.4
+	light.Color = Color3.fromRGB(255, 220, 160)
+	light.Parent = head
+end
+
 function MapBuilder.Build()
 	-- Remove the default Studio template parts so they don't clash with the city
 	for _, name in ipairs({ "Baseplate", "SpawnLocation" }) do
@@ -839,6 +1233,19 @@ function MapBuilder.Build()
 	Lighting.ClockTime = 14.5
 	Lighting.Brightness = 2
 	Lighting.OutdoorAmbient = Color3.fromRGB(140, 140, 150)
+	if not Lighting:FindFirstChild("CityBloom") then
+		local bloom = Instance.new("BloomEffect")
+		bloom.Name = "CityBloom"
+		bloom.Intensity = 0.8
+		bloom.Size = 30
+		bloom.Threshold = 0.9
+		bloom.Parent = Lighting
+		local color = Instance.new("ColorCorrectionEffect")
+		color.Name = "CityColor"
+		color.Saturation = 0.15
+		color.Contrast = 0.08
+		color.Parent = Lighting
+	end
 
 	-- Ground + invisible border walls
 	part({
@@ -868,6 +1275,62 @@ function MapBuilder.Build()
 		decal(roads, "Road", Vector3.new(0, 0.01, z), Config.MapSize, 30, asphalt, Enum.Material.Asphalt)
 	end
 
+	-- Where cash drops can land (road intersections and open streets)
+	map.DropSpots = {}
+	for _, x in ipairs(roadXs) do
+		for _, z in ipairs(roadZs) do
+			table.insert(map.DropSpots, Vector3.new(x, 0, z))
+		end
+	end
+	for _, spot in ipairs({
+		Vector3.new(-300, 0, 40), Vector3.new(300, 0, 40), Vector3.new(0, 0, 160),
+		Vector3.new(250, 0, 160), Vector3.new(-250, 0, -150), Vector3.new(-120, 0, 330), Vector3.new(100, 0, -330),
+	}) do
+		table.insert(map.DropSpots, spot)
+	end
+
+	-- Street lamps along every road
+	local lamps = Instance.new("Folder")
+	lamps.Name = "Lamps"
+	lamps.Parent = city
+	for i = -4, 4 do
+		local t = i * 90 + 45
+		for _, x in ipairs(roadXs) do
+			lamp(lamps, Vector3.new(x + 18, 0, t))
+		end
+		for _, z in ipairs(roadZs) do
+			lamp(lamps, Vector3.new(t, 0, z - 18))
+		end
+	end
+
+	-- Stunt humps on the roads, a one-way MEGA RAMP, and boost pads
+	local stunts = Instance.new("Folder")
+	stunts.Name = "Stunts"
+	stunts.Parent = city
+	hump(stunts, Vector3.new(-120, 0, -320), false)
+	hump(stunts, Vector3.new(100, 0, 300), false)
+	hump(stunts, Vector3.new(320, 0, 40), true)
+	hump(stunts, Vector3.new(-230, 0, 160), true)
+	hump(stunts, Vector3.new(230, 0, -150), true)
+	local megaStart = MapBuilder.MegaRampStart
+	local mega = rampSlab(stunts, megaStart, Vector3.xAxis, 60, 22, Color3.fromRGB(255, 60, 140))
+	mega.Name = "MegaRamp"
+	sign(stunts, megaStart + Vector3.new(30, 34, 0), "MEGA RAMP", Color3.fromRGB(255, 120, 200))
+
+	local boostFolder = Instance.new("Folder")
+	boostFolder.Name = "BoostPads"
+	boostFolder.Parent = city
+	for _, info in ipairs({
+		{ Vector3.new(-120, 0, -40), false }, { Vector3.new(100, 0, -60), false },
+		{ Vector3.new(-120, 0, 260), false }, { Vector3.new(100, 0, 180 + 40), false },
+		{ Vector3.new(-60, 0, 40), true }, { Vector3.new(220, 0, 40), true },
+		{ Vector3.new(0, 0, 160), true }, { Vector3.new(-260, 0, -150), true },
+		{ MapBuilder.MegaRampStart - Vector3.new(14, 0, 0), true },
+	}) do
+		boostPad(boostFolder, info[1], info[2])
+	end
+	map.BoostPads = boostFolder
+
 	-- Robbery targets
 	for _, rob in ipairs(Config.Robberies) do
 		local model = building(city, rob.Name, rob.Position, rob.Size, rob.Color, 14)
@@ -896,6 +1359,8 @@ function MapBuilder.Build()
 	map.Spawns.Police = CFrame.new(ps + Vector3.new(0, 3, 0))
 	vehiclePad(city, ps + Vector3.new(-20, 0, 45), 0, "Cruiser", map.VehiclePads)
 	vehiclePad(city, ps + Vector3.new(20, 0, 45), 0, "Interceptor", map.VehiclePads)
+	vehiclePad(city, ps + Vector3.new(-20, 0, 75), 0, "Thunder", map.VehiclePads)
+	vehiclePad(city, ps + Vector3.new(20, 0, 75), 0, "SkyPatrol", map.VehiclePads)
 
 	-- Jail: tall solid walls, cells inside, and a secret vent for breakouts
 	local jp = L.Jail
@@ -931,6 +1396,27 @@ function MapBuilder.Build()
 	vehiclePad(city, hp + Vector3.new(-15, 0, 50), 0, "Muscle", map.VehiclePads)
 	vehiclePad(city, hp + Vector3.new(10, 0, 50), 0, "Supercar", map.VehiclePads)
 
+	-- Insane Motors: the dealership for the wild stuff
+	local dp = L.Dealership
+	local showroom = Instance.new("Model")
+	showroom.Name = "Insane Motors"
+	showroom.Parent = city
+	decal(showroom, "Showroom", dp, 150, 70, Color3.fromRGB(30, 30, 40), Enum.Material.Marble)
+	for _, x in ipairs({ -75, 75 }) do
+		part({
+			Parent = showroom, Name = "Pillar", Size = Vector3.new(3, 24, 3), Position = dp + Vector3.new(x, 12, -36),
+			Color = Color3.fromRGB(255, 60, 140), Material = Enum.Material.Neon,
+		})
+	end
+	part({
+		Parent = showroom, Name = "Arch", Size = Vector3.new(153, 3, 3), Position = dp + Vector3.new(0, 25, -36),
+		Color = Color3.fromRGB(255, 60, 140), Material = Enum.Material.Neon,
+	})
+	sign(showroom, dp + Vector3.new(0, 32, -36), "INSANE MOTORS", Color3.fromRGB(255, 120, 200))
+	for i, key in ipairs({ "Monster", "Rocket", "Hyperion", "SkyRider" }) do
+		vehiclePad(showroom, dp + Vector3.new(-54 + (i - 1) * 34, 0, 5), 0, key, map.VehiclePads)
+	end
+
 	-- Global leaderboard board next to the hideout
 	local boardPart = part({
 		Parent = city, Name = "Leaderboard", Size = Vector3.new(24, 16, 1),
@@ -962,7 +1448,7 @@ function MapBuilder.Build()
 
 	-- Filler buildings + trees for a city feel (deterministic layout)
 	local rng = Random.new(1337)
-	local keyPoints = { L.PoliceStation, L.Jail, L.Hideout }
+	local keyPoints = { L.PoliceStation, L.Jail, L.Hideout, L.Dealership, L.Dealership + Vector3.new(-60, 0, 0), L.Dealership + Vector3.new(60, 0, 0), MapBuilder.MegaRampStart + Vector3.new(30, 0, 0) }
 	for _, rob in ipairs(Config.Robberies) do
 		table.insert(keyPoints, rob.Position)
 	end
@@ -1014,7 +1500,7 @@ function MapBuilder.Build()
 end
 
 return MapBuilder
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000A"><Properties><string name="Name">Remotes</string><ProtectedString name="Source"><![CDATA[-- Creates the RemoteEvents shared with clients (ReplicatedStorage.Remotes).
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000B"><Properties><string name="Name">Remotes</string><ProtectedString name="Source"><![CDATA[-- Creates the RemoteEvents shared with clients (ReplicatedStorage.Remotes).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local folder = ReplicatedStorage:FindFirstChild("Remotes")
@@ -1039,6 +1525,7 @@ end
 
 event("ChooseTeam") -- client -> server: ("Police" | "Criminal")
 event("Notify") -- server -> client: (text, kind) kind = "info" | "good" | "bad" | "alarm"
+event("Nitro") -- client -> server: (on: boolean) toggles the driven car's nitro flames
 
 function Remotes.Notify(player, text, kind)
 	Remotes.Events.Notify:FireClient(player, text, kind or "info")
@@ -1055,7 +1542,7 @@ function Remotes.NotifyTeam(team, text, kind)
 end
 
 return Remotes
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000B"><Properties><string name="Name">RobberyService</string><ProtectedString name="Source"><![CDATA[-- The core criminal loop: stand inside an open store to fill your bag,
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000C"><Properties><string name="Name">RobberyService</string><ProtectedString name="Source"><![CDATA[-- The core criminal loop: stand inside an open store to fill your bag,
 -- survive the alarm, then bring the bag to the Hideout to turn it into cash.
 --
 -- Store states (mirrored to ReplicatedStorage.RobberyStatus for the HUD):
@@ -1254,7 +1741,7 @@ function RobberyService.Init(map)
 end
 
 return RobberyService
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000C"><Properties><string name="Name">ShopService</string><ProtectedString name="Source"><![CDATA[-- Robux purchases: VIP game pass and cash developer products.
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000D"><Properties><string name="Name">ShopService</string><ProtectedString name="Source"><![CDATA[-- Robux purchases: VIP game pass and cash developer products.
 -- Set the IDs in Shared/Config.lua after creating them in the Creator Dashboard.
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -1344,7 +1831,7 @@ function ShopService.Init()
 end
 
 return ShopService
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000D"><Properties><string name="Name">TeamService</string><ProtectedString name="Source"><![CDATA[-- Teams, team selection, spawning and respawning.
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000E"><Properties><string name="Name">TeamService</string><ProtectedString name="Source"><![CDATA[-- Teams, team selection, spawning and respawning.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Teams = game:GetService("Teams")
@@ -1509,7 +1996,7 @@ function TeamService.Init(map)
 end
 
 return TeamService
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000E"><Properties><string name="Name">ToolService</string><ProtectedString name="Source"><![CDATA[-- Builds and hands out team tools: Handcuffs + Taser for police, Boost for criminals.
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000F"><Properties><string name="Name">ToolService</string><ProtectedString name="Source"><![CDATA[-- Builds and hands out team tools: Handcuffs + Taser for police, Boost for criminals.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
@@ -1571,17 +2058,21 @@ function ToolService.GiveTools(player, character, teamKey)
 	if teamKey == "Police" then
 		makeTool("Handcuffs", "Get close to a wanted criminal and click", Color3.fromRGB(180, 180, 190), ArrestService.TryArrest).Parent = backpack
 		makeTool("Taser", "Stun a wanted criminal in front of you (knocks them out of cars)", Color3.fromRGB(240, 220, 40), ArrestService.TryTase).Parent = backpack
+		makeTool("Spike Strip", "Throw spikes on the road to pop a getaway car's tires", Color3.fromRGB(255, 60, 60), ArrestService.PlaceSpikes).Parent = backpack
 	elseif teamKey == "Criminal" then
 		makeTool("Boost", "Short burst of speed to escape the cops", Color3.fromRGB(230, 60, 60), boost).Parent = backpack
 	end
 end
 
 return ToolService
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000F"><Properties><string name="Name">VehicleService</string><ProtectedString name="Source"><![CDATA[-- Builds drivable cars from parts and handles buying/spawning them at pads.
--- Physics: the car body slides on the ground with zero friction; a
--- LinearVelocity (horizontal plane) and an AngularVelocity (yaw only, which also
--- keeps the car from flipping) are driven by the driver's client
--- (see client/Driving.client.lua), since the driver owns the car's physics.
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000010"><Properties><string name="Name">VehicleService</string><ProtectedString name="Source"><![CDATA[-- Builds drivable vehicles from parts and handles buying/spawning them at pads.
+--
+-- Physics: an invisible-ish "Body" slab slides on the ground with zero friction.
+-- A LinearVelocity drives it (Plane mode = ground car; Vector mode = flying)
+-- and an AngularVelocity handles steering while keeping the car level, so cars
+-- never flip and fly flat off ramps. Everything else is welded decoration.
+-- The driver's client sets the movers (see client/Driving.client.lua) because
+-- the driver owns the car's physics.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -1594,84 +2085,223 @@ local VehicleService = {}
 
 local spawned = {} -- [player] = Model
 local lastSpawn = {}
+local lastNitro = {}
+
+local DARK = Color3.fromRGB(25, 25, 28)
+local GLASS = Color3.fromRGB(150, 200, 230)
+local NEON = Enum.Material.Neon
+
+-- Piece list entry: { name, size, offset (relative to body center), color, material?, extra? }
+-- Seats: { className, offset }. Exhausts: offsets where nitro flames come out.
+local function styleSpec(def)
+	local main = def.Color
+	local glow = def.Glow or main
+	local style = def.Style or "Car"
+
+	if style == "Hyper" then
+		local pieces = {
+			{ "Cabin", Vector3.new(6, 1.4, 5.5), Vector3.new(0, 1.5, 1), Color3.fromRGB(40, 40, 60), Enum.Material.Glass, { Transparency = 0.35 } },
+			{ "Nose", Vector3.new(7.6, 0.6, 4), Vector3.new(0, 1.0, -5), main },
+			{ "Wing", Vector3.new(8.4, 0.3, 1.6), Vector3.new(0, 2.6, 6.8), main },
+			{ "WingPostL", Vector3.new(0.4, 1.6, 0.4), Vector3.new(-2.5, 1.6, 6.8), DARK },
+			{ "WingPostR", Vector3.new(0.4, 1.6, 0.4), Vector3.new(2.5, 1.6, 6.8), DARK },
+			{ "StripeL", Vector3.new(0.2, 0.4, 13), Vector3.new(-4.05, 0, 0), glow, NEON },
+			{ "StripeR", Vector3.new(0.2, 0.4, 13), Vector3.new(4.05, 0, 0), glow, NEON },
+			{ "HeadL", Vector3.new(2, 0.3, 0.2), Vector3.new(-2.6, 0.3, -7.55), Color3.new(1, 1, 1), NEON },
+			{ "HeadR", Vector3.new(2, 0.3, 0.2), Vector3.new(2.6, 0.3, -7.55), Color3.new(1, 1, 1), NEON },
+			{ "Tail", Vector3.new(7, 0.3, 0.2), Vector3.new(0, 0.4, 7.55), Color3.fromRGB(255, 30, 30), NEON },
+		}
+		for _, x in ipairs({ -4.1, 4.1 }) do
+			for _, z in ipairs({ -5, 5 }) do
+				table.insert(pieces, { "Wheel", Vector3.new(1.4, 2.6, 2.6), Vector3.new(x, 0.5, z), DARK, Enum.Material.Rubber, { Shape = Enum.PartType.Cylinder } })
+			end
+		end
+		return {
+			Body = Vector3.new(8, 1.6, 15), Pieces = pieces, RoofY = 2.45,
+			Seats = { { "VehicleSeat", Vector3.new(-1.4, 0.95, 1) }, { "Seat", Vector3.new(1.4, 0.95, 1) } },
+			Exhausts = { Vector3.new(-1.2, -0.2, 7.7), Vector3.new(1.2, -0.2, 7.7) },
+		}
+	elseif style == "Monster" then
+		local pieces = {
+			{ "Frame", Vector3.new(8, 1.2, 14), Vector3.new(0, 3.6, 0), DARK, Enum.Material.Metal },
+			{ "Cab", Vector3.new(8, 4, 6.5), Vector3.new(0, 6.3, -1.5), main, nil, { Transparency = 0.15 } },
+			{ "Hood", Vector3.new(8, 1.8, 4.5), Vector3.new(0, 5.1, -6.5), main },
+			{ "Grille", Vector3.new(7, 1.2, 0.3), Vector3.new(0, 5.1, -8.8), glow, NEON },
+			{ "BedBack", Vector3.new(8, 2, 0.5), Vector3.new(0, 5.2, 6.8), main },
+			{ "BedL", Vector3.new(0.5, 2, 7), Vector3.new(-3.75, 5.2, 3.5), main },
+			{ "BedR", Vector3.new(0.5, 2, 7), Vector3.new(3.75, 5.2, 3.5), main },
+			{ "LightBar", Vector3.new(7, 0.5, 0.6), Vector3.new(0, 8.6, -3.5), Color3.fromRGB(255, 250, 220), NEON },
+		}
+		for _, x in ipairs({ -5.3, 5.3 }) do
+			for _, z in ipairs({ -5.5, 5.5 }) do
+				table.insert(pieces, { "Wheel", Vector3.new(2.6, 7, 7), Vector3.new(x, 3, z), DARK, Enum.Material.Rubber, { Shape = Enum.PartType.Cylinder } })
+			end
+		end
+		return {
+			Body = Vector3.new(9, 1, 15), HideBody = true, Pieces = pieces, RoofY = 8.55,
+			Seats = {
+				{ "VehicleSeat", Vector3.new(-1.5, 4.6, -1.5) }, { "Seat", Vector3.new(1.5, 4.6, -1.5) },
+				{ "Seat", Vector3.new(-2, 4.6, 4) }, { "Seat", Vector3.new(2, 4.6, 4) },
+			},
+			Exhausts = { Vector3.new(-3, 8.5, 1.9), Vector3.new(3, 8.5, 1.9) },
+		}
+	elseif style == "Kart" then
+		local pieces = {
+			{ "Engine", Vector3.new(3, 1.5, 1.8), Vector3.new(0, 1.2, 3.2), DARK, Enum.Material.Metal },
+			{ "Bumper", Vector3.new(5.2, 0.4, 0.4), Vector3.new(0, 0, -4.1), glow, NEON },
+			{ "RollBar", Vector3.new(3, 0.3, 0.3), Vector3.new(0, 3.2, 1.8), DARK, Enum.Material.Metal },
+			{ "RollL", Vector3.new(0.3, 2.4, 0.3), Vector3.new(-1.35, 2, 1.8), DARK, Enum.Material.Metal },
+			{ "RollR", Vector3.new(0.3, 2.4, 0.3), Vector3.new(1.35, 2, 1.8), DARK, Enum.Material.Metal },
+			{ "Fin", Vector3.new(0.3, 2, 2), Vector3.new(0, 1.8, 3.4), main },
+		}
+		for _, x in ipairs({ -2.9, 2.9 }) do
+			for _, z in ipairs({ -3, 3 }) do
+				table.insert(pieces, { "Wheel", Vector3.new(1.2, 2, 2), Vector3.new(x, 0.5, z), DARK, Enum.Material.Rubber, { Shape = Enum.PartType.Cylinder } })
+			end
+		end
+		return {
+			Body = Vector3.new(5, 1, 8), Pieces = pieces, RoofY = 3.5,
+			Seats = { { "VehicleSeat", Vector3.new(0, 0.8, 0.6) } },
+			Exhausts = { Vector3.new(-0.9, 1.4, 4.6), Vector3.new(0.9, 1.4, 4.6) },
+		}
+	elseif style == "Flyer" then
+		local pieces = {
+			{ "Wings", Vector3.new(18, 0.4, 4), Vector3.new(0, 0.2, 1.5), main },
+			{ "TipL", Vector3.new(0.4, 0.6, 1), Vector3.new(-9, 0.3, 1.5), Color3.fromRGB(255, 40, 40), NEON },
+			{ "TipR", Vector3.new(0.4, 0.6, 1), Vector3.new(9, 0.3, 1.5), Color3.fromRGB(40, 255, 80), NEON },
+			{ "Canopy", Vector3.new(5, 1.8, 6.5), Vector3.new(0, 1.6, -0.5), GLASS, Enum.Material.Glass, { Transparency = 0.45 } },
+			{ "Tail", Vector3.new(0.4, 3, 2.5), Vector3.new(0, 2.2, 5.6), main },
+			{ "ThrusterL", Vector3.new(2, 2, 1), Vector3.new(-2, 0.2, 6.8), glow, NEON },
+			{ "ThrusterR", Vector3.new(2, 2, 1), Vector3.new(2, 0.2, 6.8), glow, NEON },
+		}
+		return {
+			Body = Vector3.new(7, 1.6, 13), Pieces = pieces, RoofY = 2.75,
+			Seats = {
+				{ "VehicleSeat", Vector3.new(-1.4, 1.1, -1.5) }, { "Seat", Vector3.new(1.4, 1.1, -1.5) },
+				{ "Seat", Vector3.new(-1.4, 1.1, 1.8) }, { "Seat", Vector3.new(1.4, 1.1, 1.8) },
+			},
+			Exhausts = { Vector3.new(-2, 0.2, 7.6), Vector3.new(2, 0.2, 7.6) },
+		}
+	end
+
+	-- Default "Car"
+	local pieces = {
+		{ "Cabin", Vector3.new(6.4, 2.6, 7), Vector3.new(0, 2.3, 1), GLASS, Enum.Material.Glass, { Transparency = 0.5 } },
+		{ "Hood", Vector3.new(6.8, 0.6, 4.5), Vector3.new(0, 1.3, -4.6), main },
+		{ "HeadL", Vector3.new(1.2, 0.6, 0.2), Vector3.new(-2.6, -0.2, -7.05), Color3.fromRGB(255, 250, 220), NEON },
+		{ "HeadR", Vector3.new(1.2, 0.6, 0.2), Vector3.new(2.6, -0.2, -7.05), Color3.fromRGB(255, 250, 220), NEON },
+		{ "TailL", Vector3.new(1.2, 0.6, 0.2), Vector3.new(-2.6, -0.2, 7.05), Color3.fromRGB(255, 40, 40), NEON },
+		{ "TailR", Vector3.new(1.2, 0.6, 0.2), Vector3.new(2.6, -0.2, 7.05), Color3.fromRGB(255, 40, 40), NEON },
+	}
+	if def.Police then
+		table.insert(pieces, { "Stripe", Vector3.new(7.05, 0.5, 8), Vector3.new(0, -0.4, 1), Color3.new(1, 1, 1) })
+	end
+	for _, x in ipairs({ -3.8, 3.8 }) do
+		for _, z in ipairs({ -4.5, 4.5 }) do
+			table.insert(pieces, { "Wheel", Vector3.new(1.2, 3, 3), Vector3.new(x, 0.5, z), DARK, Enum.Material.Rubber, { Shape = Enum.PartType.Cylinder } })
+		end
+	end
+	return {
+		Body = Vector3.new(7, 2, 14), Pieces = pieces, RoofY = 3.85,
+		Seats = {
+			{ "VehicleSeat", Vector3.new(-1.5, 1.3, 0) }, { "Seat", Vector3.new(1.5, 1.3, 0) },
+			{ "Seat", Vector3.new(-1.5, 1.3, 3) }, { "Seat", Vector3.new(1.5, 1.3, 3) },
+		},
+		Exhausts = { Vector3.new(-1.8, -0.5, 7.3), Vector3.new(1.8, -0.5, 7.3) },
+	}
+end
 
 local function buildCar(vehicleKey)
 	local def = Config.Vehicles[vehicleKey]
+	local spec = styleSpec(def)
+	local half = spec.Body.Y / 2
+
 	local model = Instance.new("Model")
 	model.Name = def.Display
 	model:SetAttribute("VehicleKey", vehicleKey)
 	model:SetAttribute("MaxSpeed", def.MaxSpeed)
 	model:SetAttribute("TurnRate", def.TurnRate)
+	model:SetAttribute("Fly", def.Fly == true)
+	model:SetAttribute("RideHeight", half)
 
 	local body = Instance.new("Part")
 	body.Name = "Body"
-	body.Size = Vector3.new(7, 2, 14)
-	body.CFrame = CFrame.new(0, 1, 0)
+	body.Size = spec.Body
+	body.CFrame = CFrame.new(0, half, 0)
 	body.Color = def.Color
 	body.Material = Enum.Material.SmoothPlastic
 	body.TopSurface = Enum.SurfaceType.Smooth
 	body.BottomSurface = Enum.SurfaceType.Smooth
+	body.Transparency = spec.HideBody and 1 or 0
 	body.CustomPhysicalProperties = PhysicalProperties.new(0.6, 0, 0, 100, 100)
 	body.Parent = model
 	model.PrimaryPart = body
 
-	local function piece(className, name, size, offset, color, material, extra)
+	local function weld(p)
+		p.Massless = true
+		p.Parent = model
+		local w = Instance.new("WeldConstraint")
+		w.Part0 = body
+		w.Part1 = p
+		w.Parent = p
+	end
+
+	local function piece(className, name, size, offset, color, material, props)
 		local p = Instance.new(className)
 		p.Name = name
 		p.Size = size
-		p.CFrame = body.CFrame * offset
+		p.CFrame = body.CFrame * CFrame.new(offset)
 		p.Color = color
 		p.Material = material or Enum.Material.SmoothPlastic
 		p.TopSurface = Enum.SurfaceType.Smooth
 		p.BottomSurface = Enum.SurfaceType.Smooth
-		p.Massless = true
-		if extra then
-			extra(p)
+		p.CanCollide = false
+		for k, v in pairs(props or {}) do
+			p[k] = v
 		end
-		p.Parent = model
-		local weld = Instance.new("WeldConstraint")
-		weld.Part0 = body
-		weld.Part1 = p
-		weld.Parent = p
+		weld(p)
 		return p
 	end
 
-	-- Cabin (glass, non-collidable so players can sit inside)
-	piece("Part", "Cabin", Vector3.new(6.4, 2.6, 7), CFrame.new(0, 2.3, 1), Color3.fromRGB(150, 200, 230), Enum.Material.Glass, function(p)
-		p.Transparency = 0.5
-		p.CanCollide = false
-	end)
-	piece("Part", "Hood", Vector3.new(6.8, 0.6, 4.5), CFrame.new(0, 1.3, -4.6), def.Color)
-	-- Wheels (visual)
-	for _, x in ipairs({ -3.8, 3.8 }) do
-		for _, z in ipairs({ -4.5, 4.5 }) do
-			piece("Part", "Wheel", Vector3.new(1.2, 3, 3), CFrame.new(x, 0.5, z), Color3.fromRGB(25, 25, 25), Enum.Material.Rubber, function(p)
-				p.Shape = Enum.PartType.Cylinder
-				p.CanCollide = false
-			end)
-		end
-	end
-	-- Headlights / taillights
-	for _, x in ipairs({ -2.6, 2.6 }) do
-		piece("Part", "Headlight", Vector3.new(1.2, 0.6, 0.2), CFrame.new(x, 0.8, -7.05), Color3.fromRGB(255, 250, 220), Enum.Material.Neon, function(p)
-			p.CanCollide = false
-		end)
-		piece("Part", "Taillight", Vector3.new(1.2, 0.6, 0.2), CFrame.new(x, 0.8, 7.05), Color3.fromRGB(255, 40, 40), Enum.Material.Neon, function(p)
-			p.CanCollide = false
-		end)
-	end
-	if def.Police then
-		piece("Part", "LightRed", Vector3.new(2, 0.5, 1), CFrame.new(-1, 3.85, 1), Color3.fromRGB(255, 30, 30), Enum.Material.Neon)
-		piece("Part", "LightBlue", Vector3.new(2, 0.5, 1), CFrame.new(1, 3.85, 1), Color3.fromRGB(30, 80, 255), Enum.Material.Neon)
-		piece("Part", "Stripe", Vector3.new(7.05, 0.5, 8), CFrame.new(0, 0.6, 1), Color3.new(1, 1, 1))
+	for _, info in ipairs(spec.Pieces) do
+		piece("Part", info[1], info[2], info[3], info[4], info[5], info[6])
 	end
 
-	-- Seats
-	local seat = piece("VehicleSeat", "DriveSeat", Vector3.new(2, 0.6, 2), CFrame.new(-1.5, 1.3, 0), Color3.fromRGB(40, 40, 40))
-	seat.HeadsUpDisplay = false
-	piece("Seat", "Passenger", Vector3.new(2, 0.6, 2), CFrame.new(1.5, 1.3, 0), Color3.fromRGB(40, 40, 40))
-	piece("Seat", "RearLeft", Vector3.new(2, 0.6, 2), CFrame.new(-1.5, 1.3, 3), Color3.fromRGB(40, 40, 40))
-	piece("Seat", "RearRight", Vector3.new(2, 0.6, 2), CFrame.new(1.5, 1.3, 3), Color3.fromRGB(40, 40, 40))
+	if def.Police then
+		piece("Part", "LightRed", Vector3.new(2, 0.5, 1), Vector3.new(-1, spec.RoofY, 1), Color3.fromRGB(255, 30, 30), NEON)
+		piece("Part", "LightBlue", Vector3.new(2, 0.5, 1), Vector3.new(1, spec.RoofY, 1), Color3.fromRGB(30, 80, 255), NEON)
+	end
+
+	-- Seats (first one is the driver's VehicleSeat)
+	local driveSeat
+	for i, info in ipairs(spec.Seats) do
+		local seat = piece(info[1], i == 1 and "DriveSeat" or ("Seat" .. i), Vector3.new(2, 0.6, 2), info[2], DARK)
+		seat.CanCollide = true
+		if i == 1 then
+			seat.HeadsUpDisplay = false
+			driveSeat = seat
+		end
+	end
+
+	-- Exhaust flames (nitro). Rocket karts keep them lit all the time.
+	for _, offset in ipairs(spec.Exhausts) do
+		local pipe = piece("Part", "Exhaust", Vector3.new(0.6, 0.6, 0.6), offset, DARK, Enum.Material.Metal)
+		local fire = Instance.new("Fire")
+		fire.Name = "NitroFire"
+		fire.Size = 4
+		fire.Heat = 12
+		fire.Color = Color3.fromRGB(80, 160, 255)
+		fire.SecondaryColor = Color3.fromRGB(255, 120, 30)
+		fire.Enabled = def.AlwaysFlames == true
+		fire.Parent = pipe
+	end
+
+	-- Underglow
+	local glow = Instance.new("PointLight")
+	glow.Color = def.Glow or def.Color
+	glow.Range = 18
+	glow.Brightness = 3
+	glow.Parent = body
 
 	-- Movers
 	local attachment = Instance.new("Attachment")
@@ -1686,6 +2316,7 @@ local function buildCar(vehicleKey)
 	drive.PrimaryTangentAxis = Vector3.xAxis
 	drive.SecondaryTangentAxis = Vector3.zAxis
 	drive.PlaneVelocity = Vector2.zero
+	drive.VectorVelocity = Vector3.zero
 	drive.MaxForce = 150000
 	drive.Parent = body
 
@@ -1697,7 +2328,19 @@ local function buildCar(vehicleKey)
 	steer.MaxTorque = 5000000
 	steer.Parent = body
 
-	return model, body, seat
+	return model, body, driveSeat, half
+end
+
+local function setFlames(car, on)
+	local def = Config.Vehicles[car:GetAttribute("VehicleKey") or ""]
+	if def and def.AlwaysFlames then
+		on = true
+	end
+	for _, d in ipairs(car:GetDescendants()) do
+		if d:IsA("Fire") and d.Name == "NitroFire" then
+			d.Enabled = on
+		end
+	end
 end
 
 function VehicleService.Despawn(player)
@@ -1708,9 +2351,15 @@ function VehicleService.Despawn(player)
 	end
 end
 
+-- All spawned cars: { [player] = Model }
+function VehicleService.GetCars()
+	return spawned
+end
+
 local function spawnFor(player, vehicleKey, padCFrame)
 	local def = Config.Vehicles[vehicleKey]
-	local model, body, seat = buildCar(vehicleKey)
+	local model, body, seat, half = buildCar(vehicleKey)
+	local drive = body.Drive
 	model:SetAttribute("Owner", player.UserId)
 
 	seat:GetPropertyChangedSignal("Occupant"):Connect(function()
@@ -1724,10 +2373,18 @@ local function spawnFor(player, vehicleKey, padCFrame)
 				end
 				return
 			end
+			if def.Fly then
+				drive.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+			end
 			pcall(function()
 				body:SetNetworkOwner(driver)
 			end)
 		else
+			-- No driver: stop, drop to the ground, flames off
+			drive.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
+			drive.PlaneVelocity = Vector2.zero
+			drive.VectorVelocity = Vector3.zero
+			setFlames(model, false)
 			pcall(function()
 				body:SetNetworkOwner(nil)
 			end)
@@ -1735,7 +2392,7 @@ local function spawnFor(player, vehicleKey, padCFrame)
 	end)
 
 	VehicleService.Despawn(player)
-	model:PivotTo(padCFrame * CFrame.new(0, 1.3, 0))
+	model:PivotTo(padCFrame * CFrame.new(0, half + 0.3, 0))
 	model.Parent = workspace
 	spawned[player] = model
 	pcall(function()
@@ -1753,23 +2410,42 @@ local function onPadTriggered(player, vehicleKey, pad)
 	if lastSpawn[player] and now - lastSpawn[player] < 3 then
 		return
 	end
-	if def.Team and TeamService.GetKey(player) ~= def.Team then
-		Remotes.Notify(player, "This vehicle is for " .. def.Team .. " only.", "bad")
+	local teamKey = TeamService.GetKey(player)
+	if not teamKey or teamKey == "Prisoner" then
 		return
 	end
-	if not TeamService.GetKey(player) or TeamService.GetKey(player) == "Prisoner" then
+	if def.Team and teamKey ~= def.Team then
+		Remotes.Notify(player, "This vehicle is for " .. def.Team .. " only.", "bad")
 		return
 	end
 	if not profile.Data.OwnedVehicles[vehicleKey] then
 		if not DataService.SpendCash(player, def.Price) then
-			Remotes.Notify(player, ("You need $%d to buy the %s."):format(def.Price, def.Display), "bad")
+			Remotes.Notify(player, ("You need $%d to buy the %s. Rob stores, grab cash drops and hit stunt jumps!"):format(def.Price, def.Display), "bad")
 			return
 		end
 		profile.Data.OwnedVehicles[vehicleKey] = true
-		Remotes.Notify(player, ("You bought the %s! It's yours forever."):format(def.Display), "good")
+		Remotes.NotifyAll(("%s just bought the %s!"):format(player.Name, def.Display), "good")
 	end
 	lastSpawn[player] = now
 	spawnFor(player, vehicleKey, pad.CFrame)
+end
+
+local function onNitro(player, on)
+	if type(on) ~= "boolean" then
+		return
+	end
+	local now = os.clock()
+	if on and lastNitro[player] and now - lastNitro[player] < 0.2 then
+		return
+	end
+	lastNitro[player] = now
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	local seat = humanoid and humanoid.SeatPart
+	if seat and seat.Name == "DriveSeat" and seat.Parent then
+		local body = seat.Parent:FindFirstChild("Body")
+		local spiked = body and (body:GetAttribute("SpikedUntil") or 0) > workspace:GetServerTimeNow()
+		setFlames(seat.Parent, on and not spiked)
+	end
 end
 
 function VehicleService.Init(map)
@@ -1787,38 +2463,201 @@ function VehicleService.Init(map)
 		end)
 	end
 
+	Remotes.Events.Nitro.OnServerEvent:Connect(onNitro)
+
 	TeamService.OnTeamChanged(function(player)
 		VehicleService.Despawn(player)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		VehicleService.Despawn(player)
 		lastSpawn[player] = nil
+		lastNitro[player] = nil
 	end)
 end
 
 return VehicleService
-]]></ProtectedString></Properties></Item></Item></Item></Item><Item class="StarterPlayer" referent="RBX00000017"><Properties><string name="Name">StarterPlayer</string></Properties><Item class="StarterPlayerScripts" referent="RBX00000016"><Properties><string name="Name">StarterPlayerScripts</string></Properties><Item class="Folder" referent="RBX00000015"><Properties><string name="Name">Client</string></Properties><Item class="LocalScript" referent="RBX00000013"><Properties><string name="Name">Driving</string><ProtectedString name="Source"><![CDATA[-- Drives the car you're sitting in. The driver owns the car's physics, so
--- setting the movers here is smooth and lag-free. Works with keyboard (WASD /
--- arrows), gamepad and the mobile thumbstick via VehicleSeat input.
+]]></ProtectedString></Properties></Item></Item></Item></Item><Item class="StarterPlayer" referent="RBX00000018"><Properties><string name="Name">StarterPlayer</string></Properties><Item class="StarterPlayerScripts" referent="RBX00000017"><Properties><string name="Name">StarterPlayerScripts</string></Properties><Item class="Folder" referent="RBX00000016"><Properties><string name="Name">Client</string></Properties><Item class="LocalScript" referent="RBX00000014"><Properties><string name="Name">Driving</string><ProtectedString name="Source"><![CDATA[-- Drives the vehicle you're sitting in. The driver owns the car's physics, so
+-- setting the movers here is smooth and lag-free.
+--
+-- Controls:  W/S or arrows = gas/brake, A/D = steer (VehicleSeat input; works
+-- with gamepad and the mobile thumbstick too)
+--            F = NITRO      E / Q = fly up / down (flying cars)
+-- On-screen NITRO / UP / DOWN buttons appear while driving (for phones).
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local NitroRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Nitro")
+local camera = workspace.CurrentCamera
 
-local ACCEL = 45 -- studs/s^2
-local BRAKE = 90
+local ACCEL = 50 -- studs/s^2
+local BRAKE = 100
 local COAST = 25
+local BASE_FOV = 70
 
 local speed = 0
+local fuel = 1
 local currentSeat = nil
+local held = { Nitro = false, Up = false, Down = false }
+local nitroOn = false
+local fovTween = nil
+local lastPadBoost = 0
 
+---------------------------------------------------------------------------
+-- Driving HUD
+---------------------------------------------------------------------------
+local gui = Instance.new("ScreenGui")
+gui.Name = "DrivingUI"
+gui.ResetOnSpawn = false
+gui.Enabled = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local dash = Instance.new("Frame")
+dash.AnchorPoint = Vector2.new(1, 1)
+dash.Position = UDim2.new(1, -16, 1, -150)
+dash.Size = UDim2.new(0, 200, 0, 92)
+dash.BackgroundColor3 = Color3.fromRGB(20, 22, 30)
+dash.BackgroundTransparency = 0.25
+dash.Parent = gui
+Instance.new("UICorner", dash).CornerRadius = UDim.new(0, 12)
+
+local speedLabel = Instance.new("TextLabel")
+speedLabel.BackgroundTransparency = 1
+speedLabel.Position = UDim2.new(0, 12, 0, 6)
+speedLabel.Size = UDim2.new(1, -24, 0, 46)
+speedLabel.Font = Enum.Font.GothamBlack
+speedLabel.TextScaled = true
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.TextColor3 = Color3.new(1, 1, 1)
+speedLabel.Text = "0 MPH"
+speedLabel.Parent = dash
+
+local fuelBack = Instance.new("Frame")
+fuelBack.Position = UDim2.new(0, 12, 0, 58)
+fuelBack.Size = UDim2.new(1, -24, 0, 12)
+fuelBack.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+fuelBack.Parent = dash
+Instance.new("UICorner", fuelBack).CornerRadius = UDim.new(1, 0)
+local fuelFill = Instance.new("Frame")
+fuelFill.Size = UDim2.fromScale(1, 1)
+fuelFill.BackgroundColor3 = Color3.fromRGB(0, 220, 255)
+fuelFill.Parent = fuelBack
+Instance.new("UICorner", fuelFill).CornerRadius = UDim.new(1, 0)
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.BackgroundTransparency = 1
+statusLabel.Position = UDim2.new(0, 12, 0, 72)
+statusLabel.Size = UDim2.new(1, -24, 0, 16)
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.TextScaled = true
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.TextColor3 = Color3.fromRGB(180, 190, 210)
+statusLabel.Text = "NITRO [F]"
+statusLabel.Parent = dash
+
+local function holdButton(text, position, color, key)
+	local b = Instance.new("TextButton")
+	b.AnchorPoint = Vector2.new(1, 1)
+	b.Position = position
+	b.Size = UDim2.new(0, 84, 0, 60)
+	b.BackgroundColor3 = color
+	b.BackgroundTransparency = 0.15
+	b.Font = Enum.Font.GothamBlack
+	b.TextScaled = true
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.Text = text
+	b.Parent = gui
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 14)
+	local pad = Instance.new("UIPadding", b)
+	pad.PaddingTop = UDim.new(0, 12)
+	pad.PaddingBottom = UDim.new(0, 12)
+	b.MouseButton1Down:Connect(function()
+		held[key] = true
+	end)
+	b.MouseButton1Up:Connect(function()
+		held[key] = false
+	end)
+	b.MouseLeave:Connect(function()
+		held[key] = false
+	end)
+	return b
+end
+
+local nitroButton = holdButton("NITRO", UDim2.new(1, -224, 1, -150), Color3.fromRGB(0, 150, 220), "Nitro")
+local upButton = holdButton("UP", UDim2.new(1, -312, 1, -150), Color3.fromRGB(60, 160, 80), "Up")
+local downButton = holdButton("DOWN", UDim2.new(1, -400, 1, -150), Color3.fromRGB(160, 80, 60), "Down")
+local _ = nitroButton
+
+local keyMap = { [Enum.KeyCode.F] = "Nitro", [Enum.KeyCode.E] = "Up", [Enum.KeyCode.Q] = "Down", [Enum.KeyCode.ButtonX] = "Nitro" }
+UserInputService.InputBegan:Connect(function(input, processed)
+	local key = keyMap[input.KeyCode]
+	if key and not processed then
+		held[key] = true
+	end
+end)
+UserInputService.InputEnded:Connect(function(input)
+	local key = keyMap[input.KeyCode]
+	if key then
+		held[key] = false
+	end
+end)
+
+local function setFov(fov)
+	if fovTween then
+		fovTween:Cancel()
+	end
+	fovTween = TweenService:Create(camera, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { FieldOfView = fov })
+	fovTween:Play()
+end
+
+local function setNitro(on)
+	if on ~= nitroOn then
+		nitroOn = on
+		NitroRemote:FireServer(on)
+		setFov(on and 88 or BASE_FOV)
+	end
+end
+
+---------------------------------------------------------------------------
+-- Boost pads
+---------------------------------------------------------------------------
+local padsFolder = nil
+local function onBoostPad(position)
+	if not padsFolder then
+		local city = workspace:FindFirstChild("City")
+		padsFolder = city and city:FindFirstChild("BoostPads")
+		if not padsFolder then
+			return false
+		end
+	end
+	for _, pad in ipairs(padsFolder:GetChildren()) do
+		local p = pad.CFrame:PointToObjectSpace(position)
+		if math.abs(p.X) <= pad.Size.X / 2 and math.abs(p.Z) <= pad.Size.Z / 2 and p.Y < 6 then
+			return true
+		end
+	end
+	return false
+end
+
+---------------------------------------------------------------------------
+-- Main loop
+---------------------------------------------------------------------------
 RunService.Heartbeat:Connect(function(dt)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	local seat = humanoid and humanoid.SeatPart
 	if not seat or not seat:IsA("VehicleSeat") or seat.Name ~= "DriveSeat" then
-		currentSeat = nil
-		speed = 0
+		if currentSeat then
+			currentSeat = nil
+			speed = 0
+			setNitro(false)
+			gui.Enabled = false
+		end
+		fuel = math.min(1, fuel + dt / Config.Nitro.Recharge)
 		return
 	end
 	local car = seat.Parent
@@ -1831,14 +2670,34 @@ RunService.Heartbeat:Connect(function(dt)
 	if seat ~= currentSeat then
 		currentSeat = seat
 		speed = 0
+		gui.Enabled = true
 	end
+
+	local flying = car:GetAttribute("Fly") == true
+	upButton.Visible = flying
+	downButton.Visible = flying
 
 	local maxSpeed = car:GetAttribute("MaxSpeed") or 70
 	local turnRate = car:GetAttribute("TurnRate") or 1.8
+	local spiked = (body:GetAttribute("SpikedUntil") or 0) > workspace:GetServerTimeNow()
+	if spiked then
+		maxSpeed = maxSpeed * Config.SpikeSlowdown
+	end
+
 	local throttle = seat.ThrottleFloat
 	local steerInput = seat.SteerFloat
 
-	local target = throttle * maxSpeed
+	-- Nitro
+	local wantNitro = held.Nitro and throttle > 0 and fuel > 0 and not spiked
+	if wantNitro then
+		fuel = math.max(0, fuel - dt / Config.Nitro.Duration)
+	else
+		fuel = math.min(1, fuel + dt / Config.Nitro.Recharge)
+	end
+	setNitro(wantNitro)
+	local topSpeed = wantNitro and maxSpeed * Config.Nitro.Multiplier or maxSpeed
+
+	local target = throttle * topSpeed
 	if throttle < 0 then
 		target = throttle * maxSpeed * 0.4 -- reverse is slower
 	end
@@ -1848,7 +2707,7 @@ RunService.Heartbeat:Connect(function(dt)
 	elseif (target > 0 and speed < 0) or (target < 0 and speed > 0) then
 		rate = BRAKE
 	else
-		rate = ACCEL
+		rate = wantNitro and ACCEL * 2.5 or ACCEL
 	end
 	if speed < target then
 		speed = math.min(speed + rate * dt, target)
@@ -1856,19 +2715,61 @@ RunService.Heartbeat:Connect(function(dt)
 		speed = math.max(speed - rate * dt, target)
 	end
 
+	-- Boost pads launch you instantly
+	if not flying and not spiked and os.clock() - lastPadBoost > 1 and onBoostPad(body.Position) then
+		lastPadBoost = os.clock()
+		speed = math.max(speed, maxSpeed * Config.BoostPadMultiplier)
+		fuel = 1
+		setFov(95)
+		task.delay(0.6, function()
+			if not nitroOn then
+				setFov(BASE_FOV)
+			end
+		end)
+	end
+
 	local look = body.CFrame.LookVector
 	local flat = Vector3.new(look.X, 0, look.Z)
 	if flat.Magnitude > 0.01 then
 		flat = flat.Unit
 	end
-	drive.PlaneVelocity = Vector2.new(flat.X * speed, flat.Z * speed)
+
+	if flying and drive.VelocityConstraintMode == Enum.VelocityConstraintMode.Vector then
+		local vertical = 0
+		if held.Up then
+			vertical = Config.FlySpeedVertical
+		elseif held.Down then
+			vertical = -Config.FlySpeedVertical
+		end
+		if body.Position.Y > Config.FlyMaxAltitude and vertical > 0 then
+			vertical = 0
+		end
+		drive.VectorVelocity = Vector3.new(flat.X * speed, vertical, flat.Z * speed)
+	else
+		drive.PlaneVelocity = Vector2.new(flat.X * speed, flat.Z * speed)
+	end
 
 	-- Steering scales up with speed and flips in reverse, like a real car
 	local grip = math.clamp(math.abs(speed) / 25, 0, 1)
 	local direction = speed >= 0 and 1 or -1
 	steer.AngularVelocity = Vector3.new(0, -steerInput * turnRate * grip * direction, 0)
+
+	-- HUD
+	speedLabel.Text = ("%d MPH"):format(math.floor(body.AssemblyLinearVelocity.Magnitude * 0.9))
+	speedLabel.TextColor3 = wantNitro and Color3.fromRGB(0, 230, 255) or Color3.new(1, 1, 1)
+	fuelFill.Size = UDim2.fromScale(fuel, 1)
+	if spiked then
+		statusLabel.Text = "TIRES SPIKED!"
+		statusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+	elseif flying then
+		statusLabel.Text = "NITRO [F]  UP [E]  DOWN [Q]"
+		statusLabel.TextColor3 = Color3.fromRGB(180, 190, 210)
+	else
+		statusLabel.Text = "NITRO [F]"
+		statusLabel.TextColor3 = Color3.fromRGB(180, 190, 210)
+	end
 end)
-]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX00000014"><Properties><string name="Name">UI</string><ProtectedString name="Source"><![CDATA[-- Getaway City - all player UI: team menu, HUD, store status, robbery bar,
+]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX00000015"><Properties><string name="Name">UI</string><ProtectedString name="Source"><![CDATA[-- Getaway City - all player UI: team menu, HUD, store status, robbery bar,
 -- notifications and the shop. Built in code so there are no assets to import.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

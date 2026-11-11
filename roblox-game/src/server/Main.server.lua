@@ -11,6 +11,7 @@ local ArrestService = require(Services.ArrestService)
 local ToolService = require(Services.ToolService)
 local RobberyService = require(Services.RobberyService)
 local VehicleService = require(Services.VehicleService)
+local FunService = require(Services.FunService)
 
 local _ = Remotes -- created on require so clients can find them immediately
 
@@ -23,6 +24,7 @@ JailService.Init(map)
 ArrestService.Init()
 RobberyService.Init(map)
 VehicleService.Init(map)
+FunService.Init(map)
 
 TeamService.OnCharacterSpawned(ToolService.GiveTools)
 

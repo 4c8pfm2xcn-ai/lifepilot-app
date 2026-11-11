@@ -12,6 +12,20 @@ from scripts, so there are no assets to upload: open the place file, press Play,
 | **Police** | Watch for **ALARM** notifications → drive to the store → **Taser** wanted criminals (it knocks them out of cars) → **Handcuffs** up close to arrest them and earn a share of their bounty. |
 | **Prisoners** | Arrested criminals wait out a 60s sentence in the City Jail… or find the **secret vent** and unscrew it to break out (escaping adds bounty). |
 
+### The insane stuff
+
+| Feature | What it does |
+|---|---|
+| **Insane Motors** dealership | Monster Truck ($20k), Rocket Kart with permanent flames ($30k), Hyperion X hypercar at 180 speed ($50k), and the **SkyRider flying car** ($75k). |
+| **Police upgrades** | Thunder Pursuit hypercar ($40k) and **Sky Patrol flying cruiser** ($60k), so cops can keep up. |
+| **Nitro** on every car | Hold **F** (or the NITRO button): +60% speed, exhaust flames everyone can see, and a camera speed rush. Fuel recharges. |
+| **Flying cars** | **E** up / **Q** down (UP/DOWN buttons on phones), up to 300 studs high. |
+| **Stunt ramps** | 5 jump humps on the roads and a pink **MEGA RAMP**. Airtime pays cash (*STUNT!*, *BIG AIR!*, *INSANE STUNT!*). |
+| **Boost pads** | Glowing cyan pads on the roads launch you to 1.8x top speed and refill nitro. |
+| **Cash drops** | Every 2.5 min a parachuting crate full of cash falls somewhere in the city. It's visible from anywhere, and the first player to touch it wins. |
+| **Spike strips** (police) | Throw spikes on the road. Criminal cars that hit them drop to 35% speed for 6s with no nitro. |
+| **Day/night cycle** | Neon, street lamps and every car's colored **underglow** light up the city at night. |
+
 Progression: XP and **levels** unlock bigger heists (Bank at Lv 2, Museum at Lv 4). Cash buys faster
 cars (Muscle Car, Supercar, Police Interceptor). Players get a **daily login streak** reward, and the
 richest players are shown on a **global leaderboard** at the Hideout.
@@ -53,17 +67,18 @@ Without this, Studio play-tests work but don't save. In live servers, saving alw
 src/shared/Config.lua              every number: payouts, cooldowns, prices, speeds, IDs
 src/server/Main.server.lua         starts everything
 src/server/Services/
-  MapBuilder      generates the city (stores, police station, jail, hideout, roads, car pads)
+  MapBuilder      generates the city (stores, police, jail, hideout, Insane Motors, ramps, boost pads, lamps)
   DataService     DataStore save/load, leaderstats, XP/levels, daily reward, global leaderboard
   TeamService     teams, team menu requests, police cap (40%), spawning/respawning
   RobberyService  store states OPEN → ALARM → CLOSED, loot bags, bounty, cashing in
   ArrestService   handcuffs + taser (all checks server-side, exploit-resistant)
   JailService     jail timer, vent breakout
   ToolService     builds team tools
-  VehicleService  buy/spawn cars, part-built cars with smooth physics
+  VehicleService  buy/spawn cars (5 body styles incl. flying), nitro flames
+  FunService      stunt cash, cash drops, day/night cycle
   ShopService     VIP pass + cash products (receipts are idempotent and saved)
 src/client/UI.client.lua           team menu, HUD, store status, notifications, shop
-src/client/Driving.client.lua      car controls (keyboard, gamepad, mobile)
+src/client/Driving.client.lua      car controls, nitro, flying, speedometer (keyboard, gamepad, mobile)
 ```
 
 ## Research: why games like this blow up
@@ -111,3 +126,5 @@ player data**. A realistic path:
 - Cops can't keep up? Lower criminal car `MaxSpeed`, raise `TaserRange`.
 - Jail too boring? Lower `JailTime` or `VentTime`.
 - Economy too fast/slow? Change car `Price`s and `DailyReward`.
+- Want crazier cars? Raise `MaxSpeed` or `Config.Nitro.Multiplier`. Any car can fly: add `Fly = true`.
+- Too much stunt money? Lower `StuntCashPerSecond` / `StuntMaxCash`.

@@ -97,19 +97,55 @@ Config.Locations = {
 	PoliceStation = Vector3.new(0, 0, -260),
 	Jail = Vector3.new(260, 0, -260),
 	Hideout = Vector3.new(-300, 0, 260),
+	Dealership = Vector3.new(-300, 0, -300),
 }
 Config.MapSize = 900
 
 ---------------------------------------------------------------------------
 -- Vehicles (speeds in studs/second; players walk at 16)
 ---------------------------------------------------------------------------
+-- Style picks the body shape: Car, Hyper, Monster, Kart or Flyer.
+-- Glow is the underglow color (looks amazing at night).
+-- Fly = true makes it a flying car (E = up, Q = down).
 Config.Vehicles = {
-	Sedan = { Display = "Street Sedan", Price = 0, MaxSpeed = 70, TurnRate = 1.9, Color = Color3.fromRGB(80, 85, 95), Team = nil },
-	Muscle = { Display = "Muscle Car", Price = 4000, MaxSpeed = 95, TurnRate = 1.8, Color = Color3.fromRGB(200, 60, 40), Team = nil },
-	Supercar = { Display = "Supercar", Price = 15000, MaxSpeed = 125, TurnRate = 1.7, Color = Color3.fromRGB(250, 200, 30), Team = nil },
-	Cruiser = { Display = "Police Cruiser", Price = 0, MaxSpeed = 95, TurnRate = 1.9, Color = Color3.fromRGB(30, 50, 120), Team = "Police", Police = true },
-	Interceptor = { Display = "Police Interceptor", Price = 8000, MaxSpeed = 125, TurnRate = 1.8, Color = Color3.fromRGB(20, 20, 25), Team = "Police", Police = true },
+	-- Everyone (Hideout)
+	Sedan = { Display = "Street Sedan", Price = 0, MaxSpeed = 70, TurnRate = 1.9, Style = "Car", Color = Color3.fromRGB(80, 85, 95), Glow = Color3.fromRGB(120, 160, 255) },
+	Muscle = { Display = "Muscle Car", Price = 4000, MaxSpeed = 95, TurnRate = 1.8, Style = "Car", Color = Color3.fromRGB(200, 60, 40), Glow = Color3.fromRGB(255, 120, 40) },
+	Supercar = { Display = "Supercar", Price = 15000, MaxSpeed = 125, TurnRate = 1.7, Style = "Hyper", Color = Color3.fromRGB(250, 200, 30), Glow = Color3.fromRGB(255, 230, 80) },
+	-- Insane Motors dealership
+	Monster = { Display = "Monster Truck", Price = 20000, MaxSpeed = 95, TurnRate = 1.6, Style = "Monster", Color = Color3.fromRGB(60, 200, 80), Glow = Color3.fromRGB(80, 255, 120) },
+	Rocket = { Display = "Rocket Kart", Price = 30000, MaxSpeed = 150, TurnRate = 2.5, Style = "Kart", Color = Color3.fromRGB(255, 90, 20), Glow = Color3.fromRGB(255, 60, 0), AlwaysFlames = true },
+	Hyperion = { Display = "Hyperion X", Price = 50000, MaxSpeed = 180, TurnRate = 1.6, Style = "Hyper", Color = Color3.fromRGB(150, 40, 255), Glow = Color3.fromRGB(200, 80, 255) },
+	SkyRider = { Display = "SkyRider (flies!)", Price = 75000, MaxSpeed = 120, TurnRate = 1.8, Style = "Flyer", Color = Color3.fromRGB(30, 200, 230), Glow = Color3.fromRGB(0, 255, 255), Fly = true },
+	-- Police only (Police Station)
+	Cruiser = { Display = "Police Cruiser", Price = 0, MaxSpeed = 95, TurnRate = 1.9, Style = "Car", Color = Color3.fromRGB(30, 50, 120), Glow = Color3.fromRGB(60, 100, 255), Team = "Police", Police = true },
+	Interceptor = { Display = "Police Interceptor", Price = 8000, MaxSpeed = 125, TurnRate = 1.8, Style = "Car", Color = Color3.fromRGB(20, 20, 25), Glow = Color3.fromRGB(60, 100, 255), Team = "Police", Police = true },
+	Thunder = { Display = "Thunder Pursuit", Price = 40000, MaxSpeed = 175, TurnRate = 1.7, Style = "Hyper", Color = Color3.fromRGB(15, 25, 60), Glow = Color3.fromRGB(80, 140, 255), Team = "Police", Police = true },
+	SkyPatrol = { Display = "Sky Patrol (flies!)", Price = 60000, MaxSpeed = 120, TurnRate = 1.8, Style = "Flyer", Color = Color3.fromRGB(240, 240, 250), Glow = Color3.fromRGB(80, 140, 255), Team = "Police", Police = true, Fly = true },
 }
+
+-- Nitro: hold F (or the NITRO button). Fuel drains while used, then recharges.
+Config.Nitro = { Multiplier = 1.6, Duration = 3, Recharge = 7 }
+Config.BoostPadMultiplier = 1.8
+Config.FlySpeedVertical = 45
+Config.FlyMaxAltitude = 300
+
+-- Airtime off ramps pays cash: StuntCashPerSecond per second in the air
+Config.StuntMinAirtime = 0.7
+Config.StuntCashPerSecond = 80
+Config.StuntMaxCash = 400
+
+-- Police spike strips slow criminal cars that drive over them
+Config.SpikeCooldown = 12
+Config.SpikeLifetime = 25
+Config.SpikeSlowdown = 0.35 -- car top speed multiplier while spiked
+Config.SpikeDuration = 6
+
+-- Cash drops fall from the sky; first player to reach the crate wins
+Config.CashDrop = { Interval = 150, FallTime = 12, Lifetime = 90, Min = 400, Max = 1200 }
+
+-- Full day/night cycle length (neon and underglow shine at night)
+Config.DayLengthMinutes = 12
 
 ---------------------------------------------------------------------------
 -- Monetization. Create these in the Creator Dashboard, then paste the IDs.

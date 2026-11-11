@@ -23,6 +23,7 @@ end
 
 event("ChooseTeam") -- client -> server: ("Police" | "Criminal")
 event("Notify") -- server -> client: (text, kind) kind = "info" | "good" | "bad" | "alarm"
+event("Nitro") -- client -> server: (on: boolean) toggles the driven car's nitro flames
 
 function Remotes.Notify(player, text, kind)
 	Remotes.Events.Notify:FireClient(player, text, kind or "info")

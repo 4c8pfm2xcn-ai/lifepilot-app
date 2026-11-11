@@ -60,6 +60,7 @@ function ToolService.GiveTools(player, character, teamKey)
 	if teamKey == "Police" then
 		makeTool("Handcuffs", "Get close to a wanted criminal and click", Color3.fromRGB(180, 180, 190), ArrestService.TryArrest).Parent = backpack
 		makeTool("Taser", "Stun a wanted criminal in front of you (knocks them out of cars)", Color3.fromRGB(240, 220, 40), ArrestService.TryTase).Parent = backpack
+		makeTool("Spike Strip", "Throw spikes on the road to pop a getaway car's tires", Color3.fromRGB(255, 60, 60), ArrestService.PlaceSpikes).Parent = backpack
 	elseif teamKey == "Criminal" then
 		makeTool("Boost", "Short burst of speed to escape the cops", Color3.fromRGB(230, 60, 60), boost).Parent = backpack
 	end
