@@ -1,0 +1,2228 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4"><Item class="Workspace" referent="RBX00000001"><Properties><string name="Name">Workspace</string></Properties></Item><Item class="ReplicatedStorage" referent="RBX00000004"><Properties><string name="Name">ReplicatedStorage</string></Properties><Item class="Folder" referent="RBX00000003"><Properties><string name="Name">Shared</string></Properties><Item class="ModuleScript" referent="RBX00000002"><Properties><string name="Name">Config</string><ProtectedString name="Source"><![CDATA[-- Getaway City: every tunable number lives here so you can balance the game
+-- without touching gameplay code. Shared by server and client.
+
+local Config = {}
+
+Config.GameName = "Getaway City"
+Config.DataStoreName = "GetawayCity_PlayerData_v1"
+Config.LeaderboardStoreName = "GetawayCity_TopCash_v1"
+
+---------------------------------------------------------------------------
+-- Players
+---------------------------------------------------------------------------
+Config.StartingCash = 500
+Config.WalkSpeed = 16
+Config.JumpHeight = 7.2
+Config.RespawnDelay = 4
+
+-- Daily login reward: DailyReward * streak (streak capped at DailyStreakCap)
+Config.DailyReward = 250
+Config.DailyStreakCap = 7
+
+---------------------------------------------------------------------------
+-- Teams
+---------------------------------------------------------------------------
+Config.Teams = {
+	Police = { Name = "Police", Color = BrickColor.new("Bright blue") },
+	Criminal = { Name = "Criminals", Color = BrickColor.new("Really red") },
+	Prisoner = { Name = "Prisoners", Color = BrickColor.new("Neon orange") },
+}
+-- Police may make up at most this share of the server (always at least 1 slot)
+Config.MaxPoliceShare = 0.4
+
+---------------------------------------------------------------------------
+-- Robberies
+-- Position = center of the building on the ground. Door is on the +Z side.
+---------------------------------------------------------------------------
+Config.Robberies = {
+	{
+		Id = "GasStation", Name = "Fuel Stop",
+		Position = Vector3.new(-170, 0, -40), Size = Vector3.new(30, 14, 24),
+		Color = Color3.fromRGB(235, 200, 90),
+		Duration = 10, Payout = 350, Cooldown = 90, Xp = 30, MinLevel = 1,
+	},
+	{
+		Id = "Jewelry", Name = "Sparkle Jewelers",
+		Position = Vector3.new(160, 0, 100), Size = Vector3.new(40, 18, 32),
+		Color = Color3.fromRGB(170, 120, 210),
+		Duration = 20, Payout = 1200, Cooldown = 180, Xp = 80, MinLevel = 1,
+	},
+	{
+		Id = "Bank", Name = "City Bank",
+		Position = Vector3.new(0, 0, -60), Size = Vector3.new(60, 24, 44),
+		Color = Color3.fromRGB(200, 190, 160),
+		Duration = 30, Payout = 2000, Cooldown = 240, Xp = 120, MinLevel = 2,
+	},
+	{
+		Id = "Museum", Name = "City Museum",
+		Position = Vector3.new(-40, 0, 220), Size = Vector3.new(56, 26, 40),
+		Color = Color3.fromRGB(150, 160, 175),
+		Duration = 40, Payout = 3500, Cooldown = 300, Xp = 180, MinLevel = 4,
+	},
+}
+-- After the first robber triggers the alarm, the store stays robbable for
+-- Duration + AlarmGrace seconds, then closes for its Cooldown.
+Config.AlarmGrace = 25
+-- Bounty added = Payout * BountyPerPayout
+Config.BountyPerPayout = 0.5
+Config.MaxBag = 5000
+Config.VipMaxBag = 10000
+
+---------------------------------------------------------------------------
+-- Police
+---------------------------------------------------------------------------
+Config.ArrestRange = 9
+Config.ArrestBaseReward = 150
+Config.ArrestBountyShare = 0.75 -- cop earns this share of the robber's bounty
+Config.ArrestXp = 60
+Config.TaserRange = 40
+Config.TaserCooldown = 6
+Config.TaserStun = 2.5
+
+---------------------------------------------------------------------------
+-- Criminals / Jail
+---------------------------------------------------------------------------
+Config.BoostSpeed = 30
+Config.BoostDuration = 4
+Config.BoostCooldown = 20
+Config.JailTime = 60
+Config.EscapeBounty = 150
+Config.EscapeXp = 40
+Config.VentTime = 8 -- seconds a prisoner must stay at the vent to escape
+
+---------------------------------------------------------------------------
+-- Key map locations (ground-level centers)
+---------------------------------------------------------------------------
+Config.Locations = {
+	PoliceStation = Vector3.new(0, 0, -260),
+	Jail = Vector3.new(260, 0, -260),
+	Hideout = Vector3.new(-300, 0, 260),
+}
+Config.MapSize = 900
+
+---------------------------------------------------------------------------
+-- Vehicles (speeds in studs/second; players walk at 16)
+---------------------------------------------------------------------------
+Config.Vehicles = {
+	Sedan = { Display = "Street Sedan", Price = 0, MaxSpeed = 70, TurnRate = 1.9, Color = Color3.fromRGB(80, 85, 95), Team = nil },
+	Muscle = { Display = "Muscle Car", Price = 4000, MaxSpeed = 95, TurnRate = 1.8, Color = Color3.fromRGB(200, 60, 40), Team = nil },
+	Supercar = { Display = "Supercar", Price = 15000, MaxSpeed = 125, TurnRate = 1.7, Color = Color3.fromRGB(250, 200, 30), Team = nil },
+	Cruiser = { Display = "Police Cruiser", Price = 0, MaxSpeed = 95, TurnRate = 1.9, Color = Color3.fromRGB(30, 50, 120), Team = "Police", Police = true },
+	Interceptor = { Display = "Police Interceptor", Price = 8000, MaxSpeed = 125, TurnRate = 1.8, Color = Color3.fromRGB(20, 20, 25), Team = "Police", Police = true },
+}
+
+---------------------------------------------------------------------------
+-- Monetization. Create these in the Creator Dashboard, then paste the IDs.
+-- An ID of 0 means "not set up yet" and the button is hidden/disabled.
+---------------------------------------------------------------------------
+Config.GamePasses = {
+	VIP = 0, -- 2x robbery & arrest cash, bigger bag
+}
+Config.VipMultiplier = 2
+Config.CashProducts = {
+	{ Id = 0, Cash = 2500, Label = "$2,500" },
+	{ Id = 0, Cash = 10000, Label = "$10,000" },
+	{ Id = 0, Cash = 35000, Label = "$35,000" },
+}
+
+return Config
+]]></ProtectedString></Properties></Item></Item></Item><Item class="ServerScriptService" referent="RBX00000012"><Properties><string name="Name">ServerScriptService</string></Properties><Item class="Folder" referent="RBX00000011"><Properties><string name="Name">Server</string></Properties><Item class="Script" referent="RBX00000005"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Getaway City - server entry point. Builds the map and starts every service.
+local Services = script.Parent:WaitForChild("Services")
+
+local Remotes = require(Services.Remotes)
+local MapBuilder = require(Services.MapBuilder)
+local DataService = require(Services.DataService)
+local ShopService = require(Services.ShopService)
+local TeamService = require(Services.TeamService)
+local JailService = require(Services.JailService)
+local ArrestService = require(Services.ArrestService)
+local ToolService = require(Services.ToolService)
+local RobberyService = require(Services.RobberyService)
+local VehicleService = require(Services.VehicleService)
+
+local _ = Remotes -- created on require so clients can find them immediately
+
+local map = MapBuilder.Build()
+
+DataService.Init(map)
+ShopService.Init()
+TeamService.Init(map)
+JailService.Init(map)
+ArrestService.Init()
+RobberyService.Init(map)
+VehicleService.Init(map)
+
+TeamService.OnCharacterSpawned(ToolService.GiveTools)
+
+print("[Getaway City] Server ready")
+]]></ProtectedString></Properties></Item><Item class="Folder" referent="RBX00000010"><Properties><string name="Name">Services</string></Properties><Item class="ModuleScript" referent="RBX00000006"><Properties><string name="Name">ArrestService</string><ProtectedString name="Source"><![CDATA[-- Police actions: handcuff arrests and taser stuns. All checks are server-side.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Debris = game:GetService("Debris")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+local DataService = require(script.Parent.DataService)
+local TeamService = require(script.Parent.TeamService)
+local JailService = require(script.Parent.JailService)
+
+local ArrestService = {}
+
+local lastCuff = {}
+local lastTase = {}
+
+local function rootOf(player)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or humanoid.Health <= 0 then
+		return nil
+	end
+	return character:FindFirstChild("HumanoidRootPart"), humanoid
+end
+
+function ArrestService.IsWanted(player)
+	return player.Team == TeamService.Teams.Criminal
+		and ((player:GetAttribute("Bounty") or 0) > 0 or (player:GetAttribute("Bag") or 0) > 0)
+end
+
+-- Nearest wanted criminal within range; requireFacing limits to a cone in front of the cop
+local function findTarget(cop, range, requireFacing)
+	local copRoot = rootOf(cop)
+	if not copRoot then
+		return nil
+	end
+	local best, bestDist = nil, range
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= cop and ArrestService.IsWanted(player) then
+			local root = rootOf(player)
+			if root then
+				local offset = root.Position - copRoot.Position
+				local dist = offset.Magnitude
+				local facingOk = true
+				if requireFacing and dist > 4 then
+					facingOk = copRoot.CFrame.LookVector:Dot(offset.Unit) > 0.6
+				end
+				if dist <= bestDist and facingOk then
+					best, bestDist = player, dist
+				end
+			end
+		end
+	end
+	return best
+end
+
+function ArrestService.TryArrest(cop)
+	if cop.Team ~= TeamService.Teams.Police then
+		return
+	end
+	local now = os.clock()
+	if lastCuff[cop] and now - lastCuff[cop] < 0.5 then
+		return
+	end
+	lastCuff[cop] = now
+
+	local target = findTarget(cop, Config.ArrestRange, false)
+	if not target then
+		return
+	end
+	local bounty = target:GetAttribute("Bounty") or 0
+	local reward = (Config.ArrestBaseReward + math.floor(bounty * Config.ArrestBountyShare)) * DataService.Multiplier(cop)
+	DataService.AddCash(cop, reward)
+	DataService.AddXp(cop, Config.ArrestXp)
+	DataService.Increment(cop, "Arrests")
+
+	target:SetAttribute("Bag", 0)
+	target:SetAttribute("Bounty", 0)
+	JailService.Jail(target)
+
+	Remotes.Notify(cop, ("You arrested %s and earned $%d!"):format(target.Name, reward), "good")
+	Remotes.NotifyAll(("%s was arrested by Officer %s"):format(target.Name, cop.Name), "info")
+end
+
+local function zap(fromPos, toPos)
+	local dist = (toPos - fromPos).Magnitude
+	local beam = Instance.new("Part")
+	beam.Anchored = true
+	beam.CanCollide = false
+	beam.CanQuery = false
+	beam.CanTouch = false
+	beam.Material = Enum.Material.Neon
+	beam.Color = Color3.fromRGB(120, 200, 255)
+	beam.Size = Vector3.new(0.2, 0.2, dist)
+	beam.CFrame = CFrame.lookAt(fromPos, toPos) * CFrame.new(0, 0, -dist / 2)
+	beam.Parent = workspace
+	Debris:AddItem(beam, 0.15)
+end
+
+function ArrestService.TryTase(cop)
+	if cop.Team ~= TeamService.Teams.Police then
+		return
+	end
+	local now = os.clock()
+	if lastTase[cop] and now - lastTase[cop] < Config.TaserCooldown then
+		return
+	end
+	local target = findTarget(cop, Config.TaserRange, true)
+	if not target then
+		return
+	end
+	lastTase[cop] = now
+
+	local copRoot = rootOf(cop)
+	local root, humanoid = rootOf(target)
+	if not copRoot or not root then
+		return
+	end
+	zap(copRoot.Position, root.Position)
+
+	-- Knock them out of vehicles and freeze them briefly
+	humanoid.Sit = false
+	local stunnedUntil = workspace:GetServerTimeNow() + Config.TaserStun
+	target:SetAttribute("StunnedUntil", stunnedUntil)
+	humanoid.WalkSpeed = 0
+	humanoid.JumpHeight = 0
+	Remotes.Notify(target, "You've been TASED!", "bad")
+	task.delay(Config.TaserStun, function()
+		if humanoid.Parent and target:GetAttribute("StunnedUntil") == stunnedUntil then
+			humanoid.WalkSpeed = Config.WalkSpeed
+			humanoid.JumpHeight = Config.JumpHeight
+			target:SetAttribute("StunnedUntil", nil)
+		end
+	end)
+end
+
+function ArrestService.Init()
+	Players.PlayerRemoving:Connect(function(player)
+		lastCuff[player] = nil
+		lastTase[player] = nil
+	end)
+end
+
+return ArrestService
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000007"><Properties><string name="Name">DataService</string><ProtectedString name="Source"><![CDATA[-- Player data: loading/saving with DataStores, leaderstats, XP/levels,
+-- daily rewards and the global top-cash leaderboard.
+local DataStoreService = game:GetService("DataStoreService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+
+local DataService = {}
+
+local store, board
+pcall(function()
+	store = DataStoreService:GetDataStore(Config.DataStoreName)
+	board = DataStoreService:GetOrderedDataStore(Config.LeaderboardStoreName)
+end)
+
+local profiles = {} -- [Player] = { Data = table, CanSave = bool, Vip = bool }
+
+local function defaultData()
+	return {
+		Cash = Config.StartingCash,
+		Xp = 0,
+		Arrests = 0,
+		Robberies = 0,
+		Escapes = 0,
+		OwnedVehicles = { Sedan = true, Cruiser = true },
+		LastDaily = 0,
+		DailyStreak = 0,
+		Receipts = {},
+	}
+end
+
+local function reconcile(data)
+	local defaults = defaultData()
+	for key, value in pairs(defaults) do
+		if data[key] == nil then
+			data[key] = value
+		end
+	end
+	return data
+end
+
+function DataService.LevelFromXp(xp)
+	return math.floor(math.sqrt(xp / 100)) + 1
+end
+
+local function key(player)
+	return "u_" .. player.UserId
+end
+
+local function refreshStats(player)
+	local profile = profiles[player]
+	local stats = player:FindFirstChild("leaderstats")
+	if not profile or not stats then
+		return
+	end
+	stats.Cash.Value = profile.Data.Cash
+	stats.Level.Value = DataService.LevelFromXp(profile.Data.Xp)
+end
+
+function DataService.Get(player)
+	return profiles[player]
+end
+
+function DataService.GetLevel(player)
+	local profile = profiles[player]
+	return profile and DataService.LevelFromXp(profile.Data.Xp) or 1
+end
+
+function DataService.IsVip(player)
+	local profile = profiles[player]
+	return profile ~= nil and profile.Vip
+end
+
+function DataService.SetVip(player, isVip)
+	local profile = profiles[player]
+	if profile then
+		profile.Vip = isVip
+		player:SetAttribute("VIP", isVip)
+	end
+end
+
+function DataService.Multiplier(player)
+	return DataService.IsVip(player) and Config.VipMultiplier or 1
+end
+
+function DataService.MaxBag(player)
+	return DataService.IsVip(player) and Config.VipMaxBag or Config.MaxBag
+end
+
+function DataService.AddCash(player, amount)
+	local profile = profiles[player]
+	if not profile then
+		return
+	end
+	profile.Data.Cash = math.max(0, profile.Data.Cash + math.floor(amount))
+	refreshStats(player)
+end
+
+function DataService.SpendCash(player, amount)
+	local profile = profiles[player]
+	if not profile or profile.Data.Cash < amount then
+		return false
+	end
+	profile.Data.Cash = profile.Data.Cash - amount
+	refreshStats(player)
+	return true
+end
+
+function DataService.AddXp(player, amount)
+	local profile = profiles[player]
+	if not profile then
+		return
+	end
+	local before = DataService.LevelFromXp(profile.Data.Xp)
+	profile.Data.Xp = profile.Data.Xp + amount
+	local after = DataService.LevelFromXp(profile.Data.Xp)
+	refreshStats(player)
+	if after > before then
+		Remotes.Notify(player, "LEVEL UP! You are now level " .. after, "good")
+	end
+end
+
+function DataService.Increment(player, field, amount)
+	local profile = profiles[player]
+	if profile and type(profile.Data[field]) == "number" then
+		profile.Data[field] = profile.Data[field] + (amount or 1)
+	end
+end
+
+function DataService.Save(player)
+	local profile = profiles[player]
+	if not profile or not profile.CanSave or not store then
+		return false
+	end
+	local ok = pcall(function()
+		store:SetAsync(key(player), profile.Data)
+	end)
+	if ok and board then
+		pcall(function()
+			board:SetAsync(tostring(player.UserId), profile.Data.Cash)
+		end)
+	end
+	return ok
+end
+
+local function giveDaily(player)
+	local profile = profiles[player]
+	local now = os.time()
+	local data = profile.Data
+	if now - data.LastDaily < 86400 then
+		return
+	end
+	if now - data.LastDaily < 172800 then
+		data.DailyStreak = math.min(data.DailyStreak + 1, Config.DailyStreakCap)
+	else
+		data.DailyStreak = 1
+	end
+	data.LastDaily = now
+	local reward = Config.DailyReward * data.DailyStreak
+	DataService.AddCash(player, reward)
+	task.delay(6, function()
+		if player.Parent then
+			Remotes.Notify(player, ("Daily reward: $%d (day %d streak). Come back tomorrow for more!"):format(reward, data.DailyStreak), "good")
+		end
+	end)
+end
+
+local function onPlayerAdded(player)
+	local data, success = nil, false
+	if store then
+		for attempt = 1, 3 do
+			success = pcall(function()
+				data = store:GetAsync(key(player))
+			end)
+			if success then
+				break
+			end
+			task.wait(attempt * 2)
+		end
+	end
+	if not player.Parent then
+		return
+	end
+	if type(data) ~= "table" then
+		data = defaultData()
+	end
+	profiles[player] = { Data = reconcile(data), CanSave = success, Vip = false }
+	if not success then
+		warn("[DataService] Could not load data for " .. player.Name .. "; progress will NOT be saved this session.")
+	end
+
+	local stats = Instance.new("Folder")
+	stats.Name = "leaderstats"
+	local cash = Instance.new("IntValue")
+	cash.Name = "Cash"
+	cash.Parent = stats
+	local level = Instance.new("IntValue")
+	level.Name = "Level"
+	level.Parent = stats
+	stats.Parent = player
+
+	player:SetAttribute("Bag", 0)
+	player:SetAttribute("Bounty", 0)
+	refreshStats(player)
+	giveDaily(player)
+	player:SetAttribute("DataLoaded", true)
+end
+
+local function onPlayerRemoving(player)
+	DataService.Save(player)
+	profiles[player] = nil
+end
+
+-- Waits until a player's profile exists (or they leave)
+function DataService.WaitForProfile(player)
+	while player.Parent and not profiles[player] do
+		task.wait(0.1)
+	end
+	return profiles[player]
+end
+
+---------------------------------------------------------------------------
+-- Global leaderboard (top cash), drawn on a board in the hideout
+---------------------------------------------------------------------------
+local nameCache = {}
+local function nameFor(userId)
+	if nameCache[userId] then
+		return nameCache[userId]
+	end
+	local ok, name = pcall(function()
+		return Players:GetNameFromUserIdAsync(userId)
+	end)
+	nameCache[userId] = ok and name or ("Player " .. userId)
+	return nameCache[userId]
+end
+
+local function updateBoard(list)
+	if not board or not list then
+		return
+	end
+	local ok, page = pcall(function()
+		return board:GetSortedAsync(false, 10):GetCurrentPage()
+	end)
+	if not ok then
+		return
+	end
+	for _, child in ipairs(list:GetChildren()) do
+		if child:IsA("TextLabel") then
+			child:Destroy()
+		end
+	end
+	for rank, entry in ipairs(page) do
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.new(1, 0, 0, 40)
+		label.BackgroundTransparency = 1
+		label.TextColor3 = rank == 1 and Color3.fromRGB(255, 215, 80) or Color3.new(1, 1, 1)
+		label.Font = Enum.Font.GothamBold
+		label.TextScaled = true
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.LayoutOrder = rank
+		label.Text = ("%d. %s  -  $%d"):format(rank, nameFor(tonumber(entry.key)), entry.value)
+		label.Parent = list
+	end
+end
+
+function DataService.Init(map)
+	Players.PlayerAdded:Connect(onPlayerAdded)
+	Players.PlayerRemoving:Connect(onPlayerRemoving)
+	for _, player in ipairs(Players:GetPlayers()) do
+		task.spawn(onPlayerAdded, player)
+	end
+
+	-- Autosave + leaderboard refresh
+	task.spawn(function()
+		while true do
+			task.wait(120)
+			for _, player in ipairs(Players:GetPlayers()) do
+				DataService.Save(player)
+			end
+			updateBoard(map.LeaderboardList)
+		end
+	end)
+	task.delay(5, function()
+		updateBoard(map.LeaderboardList)
+	end)
+
+	game:BindToClose(function()
+		if RunService:IsStudio() and not store then
+			return
+		end
+		local pending = 0
+		for _, player in ipairs(Players:GetPlayers()) do
+			pending = pending + 1
+			task.spawn(function()
+				DataService.Save(player)
+				pending = pending - 1
+			end)
+		end
+		local started = os.clock()
+		while pending > 0 and os.clock() - started < 25 do
+			task.wait(0.1)
+		end
+	end)
+end
+
+return DataService
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000008"><Properties><string name="Name">JailService</string><ProtectedString name="Source"><![CDATA[-- Jail time, automatic release and secret-vent breakouts.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+local DataService = require(script.Parent.DataService)
+local TeamService = require(script.Parent.TeamService)
+
+local JailService = {}
+
+local ventProgress = {}
+
+function JailService.Jail(player)
+	player:SetAttribute("RobName", nil)
+	player:SetAttribute("RobProgress", nil)
+	player:SetAttribute("JailRelease", workspace:GetServerTimeNow() + Config.JailTime)
+	TeamService.SetTeam(player, "Prisoner", true)
+	Remotes.Notify(player, ("You've been arrested! Serve %ds... or find a way out."):format(Config.JailTime), "bad")
+end
+
+local function release(player)
+	player:SetAttribute("JailRelease", nil)
+	TeamService.SetTeam(player, "Criminal", true)
+	Remotes.Notify(player, "You served your time. Back to the Hideout!", "info")
+end
+
+local function escape(player, map)
+	player:SetAttribute("JailRelease", nil)
+	TeamService.SetTeam(player, "Criminal", false)
+	player:SetAttribute("Bounty", (player:GetAttribute("Bounty") or 0) + Config.EscapeBounty)
+	DataService.Increment(player, "Escapes")
+	DataService.AddXp(player, Config.EscapeXp)
+	if player.Character then
+		player.Character:PivotTo(map.EscapeExit)
+	end
+	Remotes.Notify(player, "You crawled through the vent and ESCAPED! Get out of here!", "good")
+	Remotes.NotifyTeam(TeamService.Teams.Police, player.Name .. " has escaped from jail!", "alarm")
+end
+
+function JailService.Init(map)
+	local prisonerTeam = TeamService.Teams.Prisoner
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
+			local now = workspace:GetServerTimeNow()
+			for _, player in ipairs(prisonerTeam:GetPlayers()) do
+				local releaseAt = player:GetAttribute("JailRelease")
+				local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+				if not releaseAt or now >= releaseAt then
+					ventProgress[player] = nil
+					player:SetAttribute("RobName", nil)
+					player:SetAttribute("RobProgress", nil)
+					release(player)
+				elseif root and (root.Position - map.Vent.Position).Magnitude < 6 then
+					-- Stay at the vent long enough to unscrew it
+					local seconds = (ventProgress[player] or 0) + 0.5
+					ventProgress[player] = seconds
+					player:SetAttribute("RobName", "the vent cover")
+					player:SetAttribute("RobProgress", math.clamp(seconds / Config.VentTime, 0, 1))
+					if seconds >= Config.VentTime then
+						ventProgress[player] = nil
+						player:SetAttribute("RobName", nil)
+						player:SetAttribute("RobProgress", nil)
+						escape(player, map)
+					end
+				elseif ventProgress[player] then
+					ventProgress[player] = nil
+					player:SetAttribute("RobName", nil)
+					player:SetAttribute("RobProgress", nil)
+				end
+			end
+		end
+	end)
+
+	-- Players who leave while jailed come back as criminals (jail is per-session)
+	Players.PlayerRemoving:Connect(function(player)
+		ventProgress[player] = nil
+		player:SetAttribute("JailRelease", nil)
+	end)
+end
+
+return JailService
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000009"><Properties><string name="Name">MapBuilder</string><ProtectedString name="Source"><![CDATA[-- Builds the whole city from code so the game works in an empty place.
+-- Feel free to replace any of this with a hand-built map later: the rest of
+-- the game only needs the markers returned by MapBuilder.Build().
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
+local MapBuilder = {}
+
+local function part(props)
+	local p = Instance.new("Part")
+	p.Anchored = true
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	p.Material = Enum.Material.SmoothPlastic
+	for k, v in pairs(props) do
+		if k ~= "Parent" then
+			p[k] = v
+		end
+	end
+	p.Parent = props.Parent
+	return p
+end
+
+-- Flat decoration lying on the ground. Not collidable, so cars glide over it.
+local function decal(parent, name, center, sizeX, sizeZ, color, material)
+	return part({
+		Parent = parent, Name = name,
+		Size = Vector3.new(sizeX, 0.2, sizeZ),
+		Position = center + Vector3.new(0, 0.05, 0),
+		Color = color, Material = material or Enum.Material.SmoothPlastic,
+		CanCollide = false,
+	})
+end
+
+-- Box building with a doorway on the +Z side (doorWidth 0 = solid walls)
+local function building(parent, name, center, size, color, doorWidth, wallMaterial)
+	local model = Instance.new("Model")
+	model.Name = name
+	model.Parent = parent
+	local t = 2
+	local h = size.Y
+	local cx, cz = center.X, center.Z
+	local mat = wallMaterial or Enum.Material.Concrete
+
+	local function wall(n, s, pos)
+		return part({ Parent = model, Name = n, Size = s, Position = pos, Color = color, Material = mat })
+	end
+
+	decal(model, "Floor", center, size.X, size.Z, Color3.fromRGB(120, 115, 110), Enum.Material.Slate)
+	wall("Back", Vector3.new(size.X, h, t), Vector3.new(cx, h / 2, cz - size.Z / 2 + t / 2))
+	wall("Left", Vector3.new(t, h, size.Z), Vector3.new(cx - size.X / 2 + t / 2, h / 2, cz))
+	wall("Right", Vector3.new(t, h, size.Z), Vector3.new(cx + size.X / 2 - t / 2, h / 2, cz))
+	local frontZ = cz + size.Z / 2 - t / 2
+	if doorWidth and doorWidth > 0 then
+		local seg = (size.X - doorWidth) / 2
+		wall("FrontL", Vector3.new(seg, h, t), Vector3.new(cx - size.X / 2 + seg / 2, h / 2, frontZ))
+		wall("FrontR", Vector3.new(seg, h, t), Vector3.new(cx + size.X / 2 - seg / 2, h / 2, frontZ))
+		local doorH = math.min(12, h - 2)
+		wall("Lintel", Vector3.new(doorWidth, h - doorH, t), Vector3.new(cx, doorH + (h - doorH) / 2, frontZ))
+	else
+		wall("Front", Vector3.new(size.X, h, t), Vector3.new(cx, h / 2, frontZ))
+	end
+	part({
+		Parent = model, Name = "Roof", Size = Vector3.new(size.X, 1, size.Z),
+		Position = Vector3.new(cx, h + 0.5, cz), Color = color:Lerp(Color3.new(0, 0, 0), 0.3), Material = mat,
+	})
+	return model
+end
+
+-- Big floating sign above a building; returns the TextLabel so it can be updated
+local function sign(parent, position, text, color)
+	local anchor = part({
+		Parent = parent, Name = "SignAnchor", Size = Vector3.new(1, 1, 1),
+		Position = position, Transparency = 1, CanCollide = false, CanQuery = false, CanTouch = false,
+	})
+	local gui = Instance.new("BillboardGui")
+	gui.Size = UDim2.new(28, 0, 6, 0)
+	gui.MaxDistance = 600
+	gui.LightInfluence = 0
+	gui.Parent = anchor
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 0.35
+	label.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+	label.TextColor3 = color or Color3.new(1, 1, 1)
+	label.Font = Enum.Font.GothamBlack
+	label.TextScaled = true
+	label.Text = text
+	label.Parent = gui
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0.2, 0)
+	corner.Parent = label
+	return label
+end
+
+local function vehiclePad(parent, position, yaw, vehicleKey, pads)
+	local def = Config.Vehicles[vehicleKey]
+	local pad = part({
+		Parent = parent, Name = "Pad_" .. vehicleKey,
+		Size = Vector3.new(14, 0.2, 22),
+		CFrame = CFrame.new(position + Vector3.new(0, 0.05, 0)) * CFrame.Angles(0, math.rad(yaw), 0),
+		Color = def.Color, Material = Enum.Material.Neon, Transparency = 0.6, CanCollide = false,
+	})
+	local kiosk = part({
+		Parent = parent, Name = "Kiosk_" .. vehicleKey, Size = Vector3.new(3, 5, 3),
+		CFrame = pad.CFrame * CFrame.new(9, 2.5, 0), Color = Color3.fromRGB(40, 40, 45),
+	})
+	table.insert(pads, { Pad = pad, Kiosk = kiosk, VehicleKey = vehicleKey })
+end
+
+local function tree(parent, position)
+	part({
+		Parent = parent, Name = "Trunk", Size = Vector3.new(2, 10, 2), Position = position + Vector3.new(0, 5, 0),
+		Color = Color3.fromRGB(110, 75, 45), Material = Enum.Material.Wood,
+	})
+	local leaves = part({
+		Parent = parent, Name = "Leaves", Size = Vector3.new(10, 10, 10), Position = position + Vector3.new(0, 13, 0),
+		Color = Color3.fromRGB(60, 140, 60), Material = Enum.Material.Grass,
+	})
+	leaves.Shape = Enum.PartType.Ball
+end
+
+function MapBuilder.Build()
+	-- Remove the default Studio template parts so they don't clash with the city
+	for _, name in ipairs({ "Baseplate", "SpawnLocation" }) do
+		local old = workspace:FindFirstChild(name)
+		if old then
+			old:Destroy()
+		end
+	end
+
+	local existing = workspace:FindFirstChild("City")
+	if existing then
+		existing:Destroy()
+	end
+	local city = Instance.new("Folder")
+	city.Name = "City"
+	city.Parent = workspace
+
+	local map = { Spawns = {}, RobZones = {}, Signs = {}, VehiclePads = {} }
+	local L = Config.Locations
+	local half = Config.MapSize / 2
+
+	Lighting.ClockTime = 14.5
+	Lighting.Brightness = 2
+	Lighting.OutdoorAmbient = Color3.fromRGB(140, 140, 150)
+
+	-- Ground + invisible border walls
+	part({
+		Parent = city, Name = "Ground", Size = Vector3.new(Config.MapSize, 2, Config.MapSize),
+		Position = Vector3.new(0, -1, 0), Color = Color3.fromRGB(90, 140, 75), Material = Enum.Material.Grass,
+	})
+	for _, info in ipairs({
+		{ Vector3.new(Config.MapSize, 80, 4), Vector3.new(0, 40, half) },
+		{ Vector3.new(Config.MapSize, 80, 4), Vector3.new(0, 40, -half) },
+		{ Vector3.new(4, 80, Config.MapSize), Vector3.new(half, 40, 0) },
+		{ Vector3.new(4, 80, Config.MapSize), Vector3.new(-half, 40, 0) },
+	}) do
+		part({ Parent = city, Name = "Border", Size = info[1], Position = info[2], Transparency = 1 })
+	end
+
+	-- Roads (visual only)
+	local roads = Instance.new("Folder")
+	roads.Name = "Roads"
+	roads.Parent = city
+	local asphalt = Color3.fromRGB(45, 45, 50)
+	local roadXs = { -120, 100 }
+	local roadZs = { -150, 40, 160 }
+	for _, x in ipairs(roadXs) do
+		decal(roads, "Road", Vector3.new(x, 0, 0), 30, Config.MapSize, asphalt, Enum.Material.Asphalt)
+	end
+	for _, z in ipairs(roadZs) do
+		decal(roads, "Road", Vector3.new(0, 0.01, z), Config.MapSize, 30, asphalt, Enum.Material.Asphalt)
+	end
+
+	-- Robbery targets
+	for _, rob in ipairs(Config.Robberies) do
+		local model = building(city, rob.Name, rob.Position, rob.Size, rob.Color, 14)
+		local zone = part({
+			Parent = model, Name = "RobZone",
+			Size = Vector3.new(rob.Size.X - 6, 12, rob.Size.Z - 6),
+			Position = rob.Position + Vector3.new(0, 6, 0),
+			Transparency = 1, CanCollide = false, CanQuery = false, CanTouch = false,
+		})
+		-- loot props so the inside doesn't look empty
+		for i = -1, 1 do
+			part({
+				Parent = model, Name = "Loot", Size = Vector3.new(4, 3, 4),
+				Position = rob.Position + Vector3.new(i * 10, 1.5, -rob.Size.Z / 4),
+				Color = Color3.fromRGB(240, 200, 60), Material = Enum.Material.Neon,
+			})
+		end
+		map.RobZones[rob.Id] = zone
+		map.Signs[rob.Id] = sign(model, rob.Position + Vector3.new(0, rob.Size.Y + 6, 0), rob.Name, Color3.new(1, 1, 1))
+	end
+
+	-- Police station
+	local ps = L.PoliceStation
+	local station = building(city, "Police Station", ps, Vector3.new(50, 20, 36), Color3.fromRGB(70, 90, 140), 14)
+	sign(station, ps + Vector3.new(0, 26, 0), "POLICE", Color3.fromRGB(120, 170, 255))
+	map.Spawns.Police = CFrame.new(ps + Vector3.new(0, 3, 0))
+	vehiclePad(city, ps + Vector3.new(-20, 0, 45), 0, "Cruiser", map.VehiclePads)
+	vehiclePad(city, ps + Vector3.new(20, 0, 45), 0, "Interceptor", map.VehiclePads)
+
+	-- Jail: tall solid walls, cells inside, and a secret vent for breakouts
+	local jp = L.Jail
+	local jailSize = Vector3.new(80, 30, 70)
+	local jail = building(city, "Jail", jp, jailSize, Color3.fromRGB(110, 110, 115), 0)
+	sign(jail, jp + Vector3.new(0, 36, 0), "CITY JAIL", Color3.fromRGB(255, 160, 60))
+	for i = -2, 2 do
+		part({
+			Parent = jail, Name = "CellWall", Size = Vector3.new(1, 12, 20),
+			Position = jp + Vector3.new(i * 14, 6, -jailSize.Z / 2 + 11), Color = Color3.fromRGB(80, 80, 85),
+		})
+	end
+	map.Spawns.Prisoner = CFrame.new(jp + Vector3.new(0, 3, 10))
+	map.Vent = part({
+		Parent = jail, Name = "Vent", Size = Vector3.new(4, 3, 0.4),
+		Position = jp + Vector3.new(-jailSize.X / 2 + 6, 1.5, -jailSize.Z / 2 + 2.3),
+		Color = Color3.fromRGB(40, 40, 40), Material = Enum.Material.DiamondPlate,
+	})
+	map.EscapeExit = CFrame.new(jp + Vector3.new(-jailSize.X / 2 - 12, 3, -jailSize.Z / 2 + 4))
+
+	-- Criminal hideout
+	local hp = L.Hideout
+	local hideout = building(city, "Hideout", hp, Vector3.new(50, 16, 40), Color3.fromRGB(90, 60, 50), 16, Enum.Material.Brick)
+	sign(hideout, hp + Vector3.new(0, 22, 0), "HIDEOUT", Color3.fromRGB(255, 90, 90))
+	map.Spawns.Criminal = CFrame.new(hp + Vector3.new(0, 3, -8))
+	map.CashZone = part({
+		Parent = hideout, Name = "CashZone", Size = Vector3.new(16, 0.3, 12),
+		Position = hp + Vector3.new(0, 0.1, 6), Color = Color3.fromRGB(60, 220, 90),
+		Material = Enum.Material.Neon, Transparency = 0.4, CanCollide = false,
+	})
+	sign(hideout, hp + Vector3.new(0, 7, 6), "CASH IN HERE", Color3.fromRGB(120, 255, 140)).Parent.Size = UDim2.new(14, 0, 3, 0)
+	vehiclePad(city, hp + Vector3.new(-40, 0, 50), 0, "Sedan", map.VehiclePads)
+	vehiclePad(city, hp + Vector3.new(-15, 0, 50), 0, "Muscle", map.VehiclePads)
+	vehiclePad(city, hp + Vector3.new(10, 0, 50), 0, "Supercar", map.VehiclePads)
+
+	-- Global leaderboard board next to the hideout
+	local boardPart = part({
+		Parent = city, Name = "Leaderboard", Size = Vector3.new(24, 16, 1),
+		CFrame = CFrame.new(hp + Vector3.new(40, 9, 10)) * CFrame.Angles(0, math.rad(-90), 0),
+		Color = Color3.fromRGB(25, 25, 30),
+	})
+	local surface = Instance.new("SurfaceGui")
+	surface.Face = Enum.NormalId.Front
+	surface.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	surface.PixelsPerStud = 25
+	surface.Parent = boardPart
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0.15, 0)
+	title.BackgroundTransparency = 1
+	title.Text = "RICHEST IN THE CITY"
+	title.TextColor3 = Color3.fromRGB(255, 215, 80)
+	title.Font = Enum.Font.GothamBlack
+	title.TextScaled = true
+	title.Parent = surface
+	local list = Instance.new("Frame")
+	list.Size = UDim2.new(0.9, 0, 0.8, 0)
+	list.Position = UDim2.new(0.05, 0, 0.17, 0)
+	list.BackgroundTransparency = 1
+	list.Parent = surface
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = list
+	map.LeaderboardList = list
+
+	-- Filler buildings + trees for a city feel (deterministic layout)
+	local rng = Random.new(1337)
+	local keyPoints = { L.PoliceStation, L.Jail, L.Hideout }
+	for _, rob in ipairs(Config.Robberies) do
+		table.insert(keyPoints, rob.Position)
+	end
+	local function clear(pos, radius)
+		for _, p in ipairs(keyPoints) do
+			if (p - pos).Magnitude < radius then
+				return false
+			end
+		end
+		for _, x in ipairs(roadXs) do
+			if math.abs(pos.X - x) < 35 then
+				return false
+			end
+		end
+		for _, z in ipairs(roadZs) do
+			if math.abs(pos.Z - z) < 35 then
+				return false
+			end
+		end
+		return true
+	end
+	local filler = Instance.new("Folder")
+	filler.Name = "Filler"
+	filler.Parent = city
+	local placed = 0
+	for _ = 1, 300 do
+		if placed >= 30 then
+			break
+		end
+		local pos = Vector3.new(rng:NextInteger(-400, 400), 0, rng:NextInteger(-400, 400))
+		if clear(pos, 90) then
+			placed = placed + 1
+			local h = rng:NextInteger(20, 70)
+			part({
+				Parent = filler, Name = "Tower", Size = Vector3.new(rng:NextInteger(20, 34), h, rng:NextInteger(20, 34)),
+				Position = pos + Vector3.new(0, h / 2, 0),
+				Color = Color3.fromHSV(rng:NextNumber(), 0.15, rng:NextNumber(0.55, 0.85)), Material = Enum.Material.Concrete,
+			})
+		end
+	end
+	for _ = 1, 60 do
+		local pos = Vector3.new(rng:NextInteger(-430, 430), 0, rng:NextInteger(-430, 430))
+		if clear(pos, 85) then
+			tree(filler, pos)
+		end
+	end
+
+	return map
+end
+
+return MapBuilder
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000A"><Properties><string name="Name">Remotes</string><ProtectedString name="Source"><![CDATA[-- Creates the RemoteEvents shared with clients (ReplicatedStorage.Remotes).
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local folder = ReplicatedStorage:FindFirstChild("Remotes")
+if not folder then
+	folder = Instance.new("Folder")
+	folder.Name = "Remotes"
+	folder.Parent = ReplicatedStorage
+end
+
+local Remotes = { Events = {} }
+
+local function event(name)
+	local remote = folder:FindFirstChild(name)
+	if not remote then
+		remote = Instance.new("RemoteEvent")
+		remote.Name = name
+		remote.Parent = folder
+	end
+	Remotes.Events[name] = remote
+	return remote
+end
+
+event("ChooseTeam") -- client -> server: ("Police" | "Criminal")
+event("Notify") -- server -> client: (text, kind) kind = "info" | "good" | "bad" | "alarm"
+
+function Remotes.Notify(player, text, kind)
+	Remotes.Events.Notify:FireClient(player, text, kind or "info")
+end
+
+function Remotes.NotifyAll(text, kind)
+	Remotes.Events.Notify:FireAllClients(text, kind or "info")
+end
+
+function Remotes.NotifyTeam(team, text, kind)
+	for _, player in ipairs(team:GetPlayers()) do
+		Remotes.Events.Notify:FireClient(player, text, kind or "info")
+	end
+end
+
+return Remotes
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000B"><Properties><string name="Name">RobberyService</string><ProtectedString name="Source"><![CDATA[-- The core criminal loop: stand inside an open store to fill your bag,
+-- survive the alarm, then bring the bag to the Hideout to turn it into cash.
+--
+-- Store states (mirrored to ReplicatedStorage.RobberyStatus for the HUD):
+--   OPEN   -> can be robbed
+--   ALARM  -> someone started robbing it; police are alerted; closes soon
+--   CLOSED -> cooling down until ReopenAt
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+local DataService = require(script.Parent.DataService)
+local TeamService = require(script.Parent.TeamService)
+
+local RobberyService = {}
+
+local states = {} -- [id] = { Status, AlarmEnds, ReopenAt, Value, Completed = {[player]=true} }
+local progress = {} -- [player] = { [id] = seconds }
+local warned = {} -- [player] = os.clock() of last "level too low" / "bag full" hint
+
+local function inside(zone, position)
+	local localPos = zone.CFrame:PointToObjectSpace(position)
+	local half = zone.Size / 2
+	return math.abs(localPos.X) <= half.X and math.abs(localPos.Y) <= half.Y and math.abs(localPos.Z) <= half.Z
+end
+
+-- Footprint check for flat pads: inside the X/Z area and within 8 studs above it
+local function onPad(pad, position)
+	local localPos = pad.CFrame:PointToObjectSpace(position)
+	local half = pad.Size / 2
+	return math.abs(localPos.X) <= half.X and math.abs(localPos.Z) <= half.Z and localPos.Y >= -1 and localPos.Y <= 8
+end
+
+local function formatTime(seconds)
+	seconds = math.max(0, math.ceil(seconds))
+	return ("%d:%02d"):format(math.floor(seconds / 60), seconds % 60)
+end
+
+local function hint(player, text)
+	local now = os.clock()
+	if not warned[player] or now - warned[player] > 6 then
+		warned[player] = now
+		Remotes.Notify(player, text, "bad")
+	end
+end
+
+local function setStatus(rob, status, now)
+	local state = states[rob.Id]
+	state.Status = status
+	state.Value.Value = status
+	if status == "ALARM" then
+		state.AlarmEnds = now + rob.Duration + Config.AlarmGrace
+		Remotes.NotifyTeam(TeamService.Teams.Police, ("ALARM! %s is being robbed!"):format(rob.Name), "alarm")
+	elseif status == "CLOSED" then
+		state.ReopenAt = now + rob.Cooldown
+		state.Value:SetAttribute("ReopenAt", state.ReopenAt)
+		state.Completed = {}
+		for _, perPlayer in pairs(progress) do
+			perPlayer[rob.Id] = nil
+		end
+	elseif status == "OPEN" then
+		Remotes.NotifyAll(("%s is open for business..."):format(rob.Name), "info")
+	end
+end
+
+local function updateSign(rob, label, now)
+	local state = states[rob.Id]
+	if state.Status == "OPEN" then
+		label.Text = rob.Name .. " - OPEN"
+		label.TextColor3 = Color3.fromRGB(110, 255, 130)
+	elseif state.Status == "ALARM" then
+		label.Text = "ALARM! " .. rob.Name
+		label.TextColor3 = (math.floor(now * 2) % 2 == 0) and Color3.fromRGB(255, 70, 70) or Color3.new(1, 1, 1)
+	else
+		label.Text = rob.Name .. " - CLOSED " .. formatTime(state.ReopenAt - now)
+		label.TextColor3 = Color3.fromRGB(170, 170, 170)
+	end
+end
+
+local function complete(player, rob)
+	local state = states[rob.Id]
+	state.Completed[player] = true
+	progress[player][rob.Id] = nil
+
+	local bag = player:GetAttribute("Bag") or 0
+	local space = DataService.MaxBag(player) - bag
+	local loot = math.min(rob.Payout * DataService.Multiplier(player), space)
+	player:SetAttribute("Bag", bag + loot)
+	player:SetAttribute("Bounty", (player:GetAttribute("Bounty") or 0) + math.floor(rob.Payout * Config.BountyPerPayout))
+	DataService.AddXp(player, rob.Xp)
+	DataService.Increment(player, "Robberies")
+	Remotes.Notify(player, ("You grabbed $%d! Get it to the Hideout before the cops catch you!"):format(loot), "good")
+end
+
+local function tickPlayer(player, map, now, dt)
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	local robbing = nil
+
+	if root and player.Team == TeamService.Teams.Criminal then
+		for _, rob in ipairs(Config.Robberies) do
+			local state = states[rob.Id]
+			if state.Status ~= "CLOSED" and not state.Completed[player] and inside(map.RobZones[rob.Id], root.Position) then
+				robbing = rob
+				break
+			end
+		end
+
+		-- Cash in at the hideout
+		local bag = player:GetAttribute("Bag") or 0
+		if bag > 0 and onPad(map.CashZone, root.Position) then
+			DataService.AddCash(player, bag)
+			player:SetAttribute("Bag", 0)
+			Remotes.Notify(player, ("Cashed in $%d! Nice getaway."):format(bag), "good")
+		end
+	end
+
+	if robbing then
+		if DataService.GetLevel(player) < robbing.MinLevel then
+			hint(player, ("You need level %d to rob %s."):format(robbing.MinLevel, robbing.Name))
+			robbing = nil
+		elseif (player:GetAttribute("Bag") or 0) >= DataService.MaxBag(player) then
+			hint(player, "Your bag is full! Cash it in at the Hideout.")
+			robbing = nil
+		end
+	end
+
+	if robbing then
+		local state = states[robbing.Id]
+		if state.Status == "OPEN" then
+			setStatus(robbing, "ALARM", now)
+		end
+		progress[player] = progress[player] or {}
+		local seconds = (progress[player][robbing.Id] or 0) + dt
+		progress[player][robbing.Id] = seconds
+		player:SetAttribute("RobName", robbing.Name)
+		player:SetAttribute("RobProgress", math.clamp(seconds / robbing.Duration, 0, 1))
+		if seconds >= robbing.Duration then
+			complete(player, robbing)
+		end
+	elseif player:GetAttribute("RobName") and player.Team ~= TeamService.Teams.Prisoner then
+		player:SetAttribute("RobName", nil)
+		player:SetAttribute("RobProgress", nil)
+	end
+end
+
+function RobberyService.Init(map)
+	local statusFolder = Instance.new("Folder")
+	statusFolder.Name = "RobberyStatus"
+	for order, rob in ipairs(Config.Robberies) do
+		local value = Instance.new("StringValue")
+		value.Name = rob.Id
+		value.Value = "OPEN"
+		value:SetAttribute("DisplayName", rob.Name)
+		value:SetAttribute("Order", order)
+		value:SetAttribute("MinLevel", rob.MinLevel)
+		value.Parent = statusFolder
+		states[rob.Id] = { Status = "OPEN", AlarmEnds = 0, ReopenAt = 0, Value = value, Completed = {} }
+	end
+	statusFolder.Parent = ReplicatedStorage
+
+	Players.PlayerRemoving:Connect(function(player)
+		progress[player] = nil
+		warned[player] = nil
+		for _, state in pairs(states) do
+			state.Completed[player] = nil
+		end
+	end)
+
+	task.spawn(function()
+		local last = os.clock()
+		while true do
+			task.wait(0.25)
+			local clock = os.clock()
+			local dt = clock - last
+			last = clock
+			local now = workspace:GetServerTimeNow()
+
+			for _, rob in ipairs(Config.Robberies) do
+				local state = states[rob.Id]
+				if state.Status == "ALARM" and now >= state.AlarmEnds then
+					setStatus(rob, "CLOSED", now)
+				elseif state.Status == "CLOSED" and now >= state.ReopenAt then
+					setStatus(rob, "OPEN", now)
+				end
+			end
+
+			for _, player in ipairs(Players:GetPlayers()) do
+				tickPlayer(player, map, now, dt)
+			end
+
+			for _, rob in ipairs(Config.Robberies) do
+				updateSign(rob, map.Signs[rob.Id], now)
+			end
+		end
+	end)
+end
+
+return RobberyService
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000C"><Properties><string name="Name">ShopService</string><ProtectedString name="Source"><![CDATA[-- Robux purchases: VIP game pass and cash developer products.
+-- Set the IDs in Shared/Config.lua after creating them in the Creator Dashboard.
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+local DataService = require(script.Parent.DataService)
+
+local ShopService = {}
+
+local productsById = {}
+for _, product in ipairs(Config.CashProducts) do
+	if product.Id ~= 0 then
+		productsById[product.Id] = product
+	end
+end
+
+local function checkVip(player)
+	local passId = Config.GamePasses.VIP
+	if passId == 0 then
+		return
+	end
+	local ok, owns = pcall(function()
+		return MarketplaceService:UserOwnsGamePassAsync(player.UserId, passId)
+	end)
+	if ok and owns then
+		DataService.SetVip(player, true)
+	end
+end
+
+local function processReceipt(info)
+	local player = Players:GetPlayerByUserId(info.PlayerId)
+	if not player then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	local product = productsById[info.ProductId]
+	local profile = DataService.Get(player)
+	if not product or not profile then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+
+	-- Idempotency: never grant the same purchase twice
+	local receipts = profile.Data.Receipts
+	for _, id in ipairs(receipts) do
+		if id == info.PurchaseId then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+	end
+
+	DataService.AddCash(player, product.Cash)
+	table.insert(receipts, info.PurchaseId)
+	while #receipts > 50 do
+		table.remove(receipts, 1)
+	end
+
+	if DataService.Save(player) or RunService:IsStudio() then
+		Remotes.Notify(player, ("Thanks for your purchase! +$%d"):format(product.Cash), "good")
+		return Enum.ProductPurchaseDecision.PurchaseGranted
+	end
+	-- Roll back so the retry doesn't double-grant
+	DataService.AddCash(player, -product.Cash)
+	table.remove(receipts)
+	return Enum.ProductPurchaseDecision.NotProcessedYet
+end
+
+function ShopService.Init()
+	MarketplaceService.ProcessReceipt = processReceipt
+
+	local function onJoin(player)
+		if DataService.WaitForProfile(player) then
+			checkVip(player)
+		end
+	end
+	Players.PlayerAdded:Connect(onJoin)
+	for _, player in ipairs(Players:GetPlayers()) do
+		task.spawn(onJoin, player)
+	end
+
+	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, purchased)
+		if purchased and passId == Config.GamePasses.VIP then
+			DataService.SetVip(player, true)
+			Remotes.Notify(player, "VIP unlocked! You now earn 2x cash and carry a bigger bag.", "good")
+		end
+	end)
+end
+
+return ShopService
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000D"><Properties><string name="Name">TeamService</string><ProtectedString name="Source"><![CDATA[-- Teams, team selection, spawning and respawning.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Teams = game:GetService("Teams")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+local DataService = require(script.Parent.DataService)
+
+local TeamService = { Teams = {} }
+
+local spawns
+local teamChangedListeners = {}
+local characterListeners = {}
+local lastRequest = {}
+
+function TeamService.OnTeamChanged(callback)
+	table.insert(teamChangedListeners, callback)
+end
+
+-- callback(player, character, teamKey)
+function TeamService.OnCharacterSpawned(callback)
+	table.insert(characterListeners, callback)
+end
+
+function TeamService.GetKey(player)
+	for teamKey, team in pairs(TeamService.Teams) do
+		if player.Team == team then
+			return teamKey
+		end
+	end
+	return nil
+end
+
+local function policeSlotsFree()
+	local total = #Players:GetPlayers()
+	local cap = math.max(1, math.floor(total * Config.MaxPoliceShare))
+	return #TeamService.Teams.Police:GetPlayers() < cap
+end
+
+-- Moves a player to a team. respawn=true reloads their character at the team spawn.
+function TeamService.SetTeam(player, teamKey, respawn)
+	local team = TeamService.Teams[teamKey]
+	if not team then
+		return
+	end
+	local changed = player.Team ~= team
+	player.Neutral = false
+	player.Team = team
+	if changed then
+		for _, callback in ipairs(teamChangedListeners) do
+			task.spawn(callback, player, teamKey)
+		end
+	end
+	if respawn then
+		player:LoadCharacter()
+	end
+end
+
+local function onCharacterAdded(player, character)
+	local humanoid = character:WaitForChild("Humanoid")
+	local root = character:WaitForChild("HumanoidRootPart")
+	humanoid.WalkSpeed = Config.WalkSpeed
+	humanoid.UseJumpPower = false
+	humanoid.JumpHeight = Config.JumpHeight
+
+	local teamKey = TeamService.GetKey(player)
+	if teamKey and spawns[teamKey] then
+		if not character.Parent then
+			character.AncestryChanged:Wait()
+		end
+		task.wait()
+		local offset = Vector3.new(math.random(-6, 6), 0, math.random(-6, 6))
+		character:PivotTo(spawns[teamKey] + offset)
+		root.AssemblyLinearVelocity = Vector3.zero
+	end
+
+	for _, callback in ipairs(characterListeners) do
+		task.spawn(callback, player, character, teamKey)
+	end
+
+	humanoid.Died:Connect(function()
+		-- Dropping the loot bag on death keeps chases meaningful
+		if (player:GetAttribute("Bag") or 0) > 0 then
+			player:SetAttribute("Bag", 0)
+			Remotes.Notify(player, "You died and dropped your loot bag!", "bad")
+		end
+		task.delay(Config.RespawnDelay, function()
+			if player.Parent and player.Character == character then
+				player:LoadCharacter()
+			end
+		end)
+	end)
+end
+
+local function onChooseTeam(player, teamKey)
+	if teamKey ~= "Police" and teamKey ~= "Criminal" then
+		return
+	end
+	local now = os.clock()
+	if lastRequest[player] and now - lastRequest[player] < 2 then
+		return
+	end
+	lastRequest[player] = now
+
+	if not DataService.WaitForProfile(player) then
+		return
+	end
+	local current = TeamService.GetKey(player)
+	if current == "Prisoner" then
+		Remotes.Notify(player, "Nice try. You can't switch teams while in jail!", "bad")
+		return
+	end
+	if current == teamKey and player.Character then
+		return
+	end
+	if teamKey == "Police" and not policeSlotsFree() then
+		Remotes.Notify(player, "The police force is full right now. Try again soon!", "bad")
+		return
+	end
+	-- Switching sides forfeits any loot and bounty
+	player:SetAttribute("Bag", 0)
+	player:SetAttribute("Bounty", 0)
+	TeamService.SetTeam(player, teamKey, true)
+
+	if teamKey == "Police" then
+		Remotes.Notify(player, "You're a cop! Use Handcuffs on criminals with a bounty. Watch for robbery alarms.", "info")
+	else
+		Remotes.Notify(player, "You're a criminal! Rob a store, then bring the loot back to the Hideout to cash in.", "info")
+	end
+end
+
+function TeamService.Init(map)
+	spawns = map.Spawns
+	Players.CharacterAutoLoads = false
+
+	for teamKey, info in pairs(Config.Teams) do
+		local team = Teams:FindFirstChild(info.Name)
+		if not team then
+			team = Instance.new("Team")
+			team.Name = info.Name
+			team.TeamColor = info.Color
+			team.AutoAssignable = false
+			team.Parent = Teams
+		end
+		TeamService.Teams[teamKey] = team
+	end
+
+	local function setup(player)
+		player.CharacterAdded:Connect(function(character)
+			onCharacterAdded(player, character)
+		end)
+	end
+	Players.PlayerAdded:Connect(setup)
+	for _, player in ipairs(Players:GetPlayers()) do
+		setup(player)
+	end
+	Players.PlayerRemoving:Connect(function(player)
+		lastRequest[player] = nil
+	end)
+
+	Remotes.Events.ChooseTeam.OnServerEvent:Connect(onChooseTeam)
+end
+
+return TeamService
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000E"><Properties><string name="Name">ToolService</string><ProtectedString name="Source"><![CDATA[-- Builds and hands out team tools: Handcuffs + Taser for police, Boost for criminals.
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+local ArrestService = require(script.Parent.ArrestService)
+
+local ToolService = {}
+
+local lastBoost = {}
+
+local function makeTool(name, tip, color, onActivated)
+	local tool = Instance.new("Tool")
+	tool.Name = name
+	tool.ToolTip = tip
+	tool.CanBeDropped = false
+	tool.RequiresHandle = true
+	local handle = Instance.new("Part")
+	handle.Name = "Handle"
+	handle.Size = Vector3.new(0.6, 0.6, 1.4)
+	handle.Color = color
+	handle.Material = Enum.Material.Metal
+	handle.CanCollide = false
+	handle.Massless = true
+	handle.Parent = tool
+	tool.Activated:Connect(function()
+		local character = tool.Parent
+		local player = character and game:GetService("Players"):GetPlayerFromCharacter(character)
+		if player then
+			onActivated(player)
+		end
+	end)
+	return tool
+end
+
+local function boost(player)
+	local now = os.clock()
+	if lastBoost[player] and now - lastBoost[player] < Config.BoostCooldown then
+		Remotes.Notify(player, ("Boost recharging: %ds"):format(math.ceil(Config.BoostCooldown - (now - lastBoost[player]))), "info")
+		return
+	end
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or player:GetAttribute("StunnedUntil") then
+		return
+	end
+	lastBoost[player] = now
+	humanoid.WalkSpeed = Config.BoostSpeed
+	task.delay(Config.BoostDuration, function()
+		if humanoid.Parent and not player:GetAttribute("StunnedUntil") then
+			humanoid.WalkSpeed = Config.WalkSpeed
+		end
+	end)
+end
+
+function ToolService.GiveTools(player, character, teamKey)
+	local backpack = player:WaitForChild("Backpack")
+	if player.Character ~= character then
+		return
+	end
+	if teamKey == "Police" then
+		makeTool("Handcuffs", "Get close to a wanted criminal and click", Color3.fromRGB(180, 180, 190), ArrestService.TryArrest).Parent = backpack
+		makeTool("Taser", "Stun a wanted criminal in front of you (knocks them out of cars)", Color3.fromRGB(240, 220, 40), ArrestService.TryTase).Parent = backpack
+	elseif teamKey == "Criminal" then
+		makeTool("Boost", "Short burst of speed to escape the cops", Color3.fromRGB(230, 60, 60), boost).Parent = backpack
+	end
+end
+
+return ToolService
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX0000000F"><Properties><string name="Name">VehicleService</string><ProtectedString name="Source"><![CDATA[-- Builds drivable cars from parts and handles buying/spawning them at pads.
+-- Physics: the car body slides on the ground with zero friction; a
+-- LinearVelocity (horizontal plane) and an AngularVelocity (yaw only, which also
+-- keeps the car from flipping) are driven by the driver's client
+-- (see client/Driving.client.lua), since the driver owns the car's physics.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = require(script.Parent.Remotes)
+local DataService = require(script.Parent.DataService)
+local TeamService = require(script.Parent.TeamService)
+
+local VehicleService = {}
+
+local spawned = {} -- [player] = Model
+local lastSpawn = {}
+
+local function buildCar(vehicleKey)
+	local def = Config.Vehicles[vehicleKey]
+	local model = Instance.new("Model")
+	model.Name = def.Display
+	model:SetAttribute("VehicleKey", vehicleKey)
+	model:SetAttribute("MaxSpeed", def.MaxSpeed)
+	model:SetAttribute("TurnRate", def.TurnRate)
+
+	local body = Instance.new("Part")
+	body.Name = "Body"
+	body.Size = Vector3.new(7, 2, 14)
+	body.CFrame = CFrame.new(0, 1, 0)
+	body.Color = def.Color
+	body.Material = Enum.Material.SmoothPlastic
+	body.TopSurface = Enum.SurfaceType.Smooth
+	body.BottomSurface = Enum.SurfaceType.Smooth
+	body.CustomPhysicalProperties = PhysicalProperties.new(0.6, 0, 0, 100, 100)
+	body.Parent = model
+	model.PrimaryPart = body
+
+	local function piece(className, name, size, offset, color, material, extra)
+		local p = Instance.new(className)
+		p.Name = name
+		p.Size = size
+		p.CFrame = body.CFrame * offset
+		p.Color = color
+		p.Material = material or Enum.Material.SmoothPlastic
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.Massless = true
+		if extra then
+			extra(p)
+		end
+		p.Parent = model
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = body
+		weld.Part1 = p
+		weld.Parent = p
+		return p
+	end
+
+	-- Cabin (glass, non-collidable so players can sit inside)
+	piece("Part", "Cabin", Vector3.new(6.4, 2.6, 7), CFrame.new(0, 2.3, 1), Color3.fromRGB(150, 200, 230), Enum.Material.Glass, function(p)
+		p.Transparency = 0.5
+		p.CanCollide = false
+	end)
+	piece("Part", "Hood", Vector3.new(6.8, 0.6, 4.5), CFrame.new(0, 1.3, -4.6), def.Color)
+	-- Wheels (visual)
+	for _, x in ipairs({ -3.8, 3.8 }) do
+		for _, z in ipairs({ -4.5, 4.5 }) do
+			piece("Part", "Wheel", Vector3.new(1.2, 3, 3), CFrame.new(x, 0.5, z), Color3.fromRGB(25, 25, 25), Enum.Material.Rubber, function(p)
+				p.Shape = Enum.PartType.Cylinder
+				p.CanCollide = false
+			end)
+		end
+	end
+	-- Headlights / taillights
+	for _, x in ipairs({ -2.6, 2.6 }) do
+		piece("Part", "Headlight", Vector3.new(1.2, 0.6, 0.2), CFrame.new(x, 0.8, -7.05), Color3.fromRGB(255, 250, 220), Enum.Material.Neon, function(p)
+			p.CanCollide = false
+		end)
+		piece("Part", "Taillight", Vector3.new(1.2, 0.6, 0.2), CFrame.new(x, 0.8, 7.05), Color3.fromRGB(255, 40, 40), Enum.Material.Neon, function(p)
+			p.CanCollide = false
+		end)
+	end
+	if def.Police then
+		piece("Part", "LightRed", Vector3.new(2, 0.5, 1), CFrame.new(-1, 3.85, 1), Color3.fromRGB(255, 30, 30), Enum.Material.Neon)
+		piece("Part", "LightBlue", Vector3.new(2, 0.5, 1), CFrame.new(1, 3.85, 1), Color3.fromRGB(30, 80, 255), Enum.Material.Neon)
+		piece("Part", "Stripe", Vector3.new(7.05, 0.5, 8), CFrame.new(0, 0.6, 1), Color3.new(1, 1, 1))
+	end
+
+	-- Seats
+	local seat = piece("VehicleSeat", "DriveSeat", Vector3.new(2, 0.6, 2), CFrame.new(-1.5, 1.3, 0), Color3.fromRGB(40, 40, 40))
+	seat.HeadsUpDisplay = false
+	piece("Seat", "Passenger", Vector3.new(2, 0.6, 2), CFrame.new(1.5, 1.3, 0), Color3.fromRGB(40, 40, 40))
+	piece("Seat", "RearLeft", Vector3.new(2, 0.6, 2), CFrame.new(-1.5, 1.3, 3), Color3.fromRGB(40, 40, 40))
+	piece("Seat", "RearRight", Vector3.new(2, 0.6, 2), CFrame.new(1.5, 1.3, 3), Color3.fromRGB(40, 40, 40))
+
+	-- Movers
+	local attachment = Instance.new("Attachment")
+	attachment.Name = "Root"
+	attachment.Parent = body
+
+	local drive = Instance.new("LinearVelocity")
+	drive.Name = "Drive"
+	drive.Attachment0 = attachment
+	drive.RelativeTo = Enum.ActuatorRelativeTo.World
+	drive.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
+	drive.PrimaryTangentAxis = Vector3.xAxis
+	drive.SecondaryTangentAxis = Vector3.zAxis
+	drive.PlaneVelocity = Vector2.zero
+	drive.MaxForce = 150000
+	drive.Parent = body
+
+	local steer = Instance.new("AngularVelocity")
+	steer.Name = "Steer"
+	steer.Attachment0 = attachment
+	steer.RelativeTo = Enum.ActuatorRelativeTo.World
+	steer.AngularVelocity = Vector3.zero
+	steer.MaxTorque = 5000000
+	steer.Parent = body
+
+	return model, body, seat
+end
+
+function VehicleService.Despawn(player)
+	local car = spawned[player]
+	if car then
+		car:Destroy()
+		spawned[player] = nil
+	end
+end
+
+local function spawnFor(player, vehicleKey, padCFrame)
+	local def = Config.Vehicles[vehicleKey]
+	local model, body, seat = buildCar(vehicleKey)
+	model:SetAttribute("Owner", player.UserId)
+
+	seat:GetPropertyChangedSignal("Occupant"):Connect(function()
+		local occupant = seat.Occupant
+		if occupant then
+			local driver = Players:GetPlayerFromCharacter(occupant.Parent)
+			if not driver or (def.Team and TeamService.GetKey(driver) ~= def.Team) then
+				occupant.Sit = false
+				if driver then
+					Remotes.Notify(driver, "Only " .. def.Team .. " can drive this.", "bad")
+				end
+				return
+			end
+			pcall(function()
+				body:SetNetworkOwner(driver)
+			end)
+		else
+			pcall(function()
+				body:SetNetworkOwner(nil)
+			end)
+		end
+	end)
+
+	VehicleService.Despawn(player)
+	model:PivotTo(padCFrame * CFrame.new(0, 1.3, 0))
+	model.Parent = workspace
+	spawned[player] = model
+	pcall(function()
+		body:SetNetworkOwner(nil)
+	end)
+end
+
+local function onPadTriggered(player, vehicleKey, pad)
+	local def = Config.Vehicles[vehicleKey]
+	local profile = DataService.Get(player)
+	if not profile then
+		return
+	end
+	local now = os.clock()
+	if lastSpawn[player] and now - lastSpawn[player] < 3 then
+		return
+	end
+	if def.Team and TeamService.GetKey(player) ~= def.Team then
+		Remotes.Notify(player, "This vehicle is for " .. def.Team .. " only.", "bad")
+		return
+	end
+	if not TeamService.GetKey(player) or TeamService.GetKey(player) == "Prisoner" then
+		return
+	end
+	if not profile.Data.OwnedVehicles[vehicleKey] then
+		if not DataService.SpendCash(player, def.Price) then
+			Remotes.Notify(player, ("You need $%d to buy the %s."):format(def.Price, def.Display), "bad")
+			return
+		end
+		profile.Data.OwnedVehicles[vehicleKey] = true
+		Remotes.Notify(player, ("You bought the %s! It's yours forever."):format(def.Display), "good")
+	end
+	lastSpawn[player] = now
+	spawnFor(player, vehicleKey, pad.CFrame)
+end
+
+function VehicleService.Init(map)
+	for _, info in ipairs(map.VehiclePads) do
+		local def = Config.Vehicles[info.VehicleKey]
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.ActionText = "Spawn"
+		prompt.ObjectText = def.Price > 0 and ("%s ($%d to unlock)"):format(def.Display, def.Price) or (def.Display .. " (free)")
+		prompt.HoldDuration = 0.3
+		prompt.MaxActivationDistance = 12
+		prompt.RequiresLineOfSight = false
+		prompt.Parent = info.Kiosk
+		prompt.Triggered:Connect(function(player)
+			onPadTriggered(player, info.VehicleKey, info.Pad)
+		end)
+	end
+
+	TeamService.OnTeamChanged(function(player)
+		VehicleService.Despawn(player)
+	end)
+	Players.PlayerRemoving:Connect(function(player)
+		VehicleService.Despawn(player)
+		lastSpawn[player] = nil
+	end)
+end
+
+return VehicleService
+]]></ProtectedString></Properties></Item></Item></Item></Item><Item class="StarterPlayer" referent="RBX00000017"><Properties><string name="Name">StarterPlayer</string></Properties><Item class="StarterPlayerScripts" referent="RBX00000016"><Properties><string name="Name">StarterPlayerScripts</string></Properties><Item class="Folder" referent="RBX00000015"><Properties><string name="Name">Client</string></Properties><Item class="LocalScript" referent="RBX00000013"><Properties><string name="Name">Driving</string><ProtectedString name="Source"><![CDATA[-- Drives the car you're sitting in. The driver owns the car's physics, so
+-- setting the movers here is smooth and lag-free. Works with keyboard (WASD /
+-- arrows), gamepad and the mobile thumbstick via VehicleSeat input.
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+local ACCEL = 45 -- studs/s^2
+local BRAKE = 90
+local COAST = 25
+
+local speed = 0
+local currentSeat = nil
+
+RunService.Heartbeat:Connect(function(dt)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local seat = humanoid and humanoid.SeatPart
+	if not seat or not seat:IsA("VehicleSeat") or seat.Name ~= "DriveSeat" then
+		currentSeat = nil
+		speed = 0
+		return
+	end
+	local car = seat.Parent
+	local body = car and car:FindFirstChild("Body")
+	local drive = body and body:FindFirstChild("Drive")
+	local steer = body and body:FindFirstChild("Steer")
+	if not drive or not steer then
+		return
+	end
+	if seat ~= currentSeat then
+		currentSeat = seat
+		speed = 0
+	end
+
+	local maxSpeed = car:GetAttribute("MaxSpeed") or 70
+	local turnRate = car:GetAttribute("TurnRate") or 1.8
+	local throttle = seat.ThrottleFloat
+	local steerInput = seat.SteerFloat
+
+	local target = throttle * maxSpeed
+	if throttle < 0 then
+		target = throttle * maxSpeed * 0.4 -- reverse is slower
+	end
+	local rate
+	if throttle == 0 then
+		rate = COAST
+	elseif (target > 0 and speed < 0) or (target < 0 and speed > 0) then
+		rate = BRAKE
+	else
+		rate = ACCEL
+	end
+	if speed < target then
+		speed = math.min(speed + rate * dt, target)
+	elseif speed > target then
+		speed = math.max(speed - rate * dt, target)
+	end
+
+	local look = body.CFrame.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	if flat.Magnitude > 0.01 then
+		flat = flat.Unit
+	end
+	drive.PlaneVelocity = Vector2.new(flat.X * speed, flat.Z * speed)
+
+	-- Steering scales up with speed and flips in reverse, like a real car
+	local grip = math.clamp(math.abs(speed) / 25, 0, 1)
+	local direction = speed >= 0 and 1 or -1
+	steer.AngularVelocity = Vector3.new(0, -steerInput * turnRate * grip * direction, 0)
+end)
+]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX00000014"><Properties><string name="Name">UI</string><ProtectedString name="Source"><![CDATA[-- Getaway City - all player UI: team menu, HUD, store status, robbery bar,
+-- notifications and the shop. Built in code so there are no assets to import.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MarketplaceService = game:GetService("MarketplaceService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+local WHITE = Color3.new(1, 1, 1)
+local PANEL = Color3.fromRGB(20, 22, 30)
+local GREEN = Color3.fromRGB(90, 230, 120)
+local RED = Color3.fromRGB(240, 70, 70)
+local BLUE = Color3.fromRGB(70, 140, 255)
+local ORANGE = Color3.fromRGB(255, 160, 60)
+local GOLD = Color3.fromRGB(255, 210, 80)
+
+local function new(className, props, children)
+	local inst = Instance.new(className)
+	for k, v in pairs(props or {}) do
+		if k ~= "Parent" then
+			inst[k] = v
+		end
+	end
+	for _, child in ipairs(children or {}) do
+		child.Parent = inst
+	end
+	if props and props.Parent then
+		inst.Parent = props.Parent
+	end
+	return inst
+end
+
+local function corner(radius)
+	return new("UICorner", { CornerRadius = UDim.new(0, radius or 10) })
+end
+
+local function padding(px)
+	return new("UIPadding", {
+		PaddingTop = UDim.new(0, px), PaddingBottom = UDim.new(0, px),
+		PaddingLeft = UDim.new(0, px), PaddingRight = UDim.new(0, px),
+	})
+end
+
+local function money(n)
+	local s = tostring(math.floor(n or 0))
+	local formatted = s:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+	if formatted:sub(1, 1) == "," then
+		formatted = formatted:sub(2)
+	end
+	return "$" .. formatted
+end
+
+local function label(props)
+	props.BackgroundTransparency = props.BackgroundTransparency or 1
+	props.TextColor3 = props.TextColor3 or WHITE
+	props.Font = props.Font or Enum.Font.GothamBold
+	props.TextScaled = props.TextScaled ~= false
+	return new("TextLabel", props)
+end
+
+local function button(props, onClick)
+	props.AutoButtonColor = true
+	props.TextColor3 = props.TextColor3 or WHITE
+	props.Font = props.Font or Enum.Font.GothamBlack
+	props.TextScaled = true
+	local b = new("TextButton", props, { corner(10), padding(6) })
+	b.Activated:Connect(onClick)
+	return b
+end
+
+local gui = new("ScreenGui", {
+	Name = "GetawayUI", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+	Parent = player:WaitForChild("PlayerGui"),
+})
+
+---------------------------------------------------------------------------
+-- HUD (left side)
+---------------------------------------------------------------------------
+local hud = new("Frame", {
+	Parent = gui, Name = "HUD", Position = UDim2.new(0, 12, 0.28, 0), Size = UDim2.new(0, 210, 0, 0),
+	AutomaticSize = Enum.AutomaticSize.Y, BackgroundColor3 = PANEL, BackgroundTransparency = 0.25,
+}, { corner(12), padding(10), new("UIListLayout", { Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder }) })
+
+local teamLabel = label({ Parent = hud, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 1, Text = "" })
+local cashLabel = label({ Parent = hud, Size = UDim2.new(1, 0, 0, 34), LayoutOrder = 2, Text = "$0", TextColor3 = GREEN, Font = Enum.Font.GothamBlack })
+local levelLabel = label({ Parent = hud, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 3, Text = "Level 1" })
+local bagLabel = label({ Parent = hud, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 4, Text = "", TextColor3 = GOLD })
+local bountyLabel = label({ Parent = hud, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 5, Text = "", TextColor3 = RED })
+local jailLabel = label({ Parent = hud, Size = UDim2.new(1, 0, 0, 40), LayoutOrder = 6, Text = "", TextColor3 = ORANGE, TextWrapped = true })
+
+local buttonRow = new("Frame", { Parent = hud, Size = UDim2.new(1, 0, 0, 36), LayoutOrder = 7, BackgroundTransparency = 1 }, {
+	new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6) }),
+})
+
+---------------------------------------------------------------------------
+-- Team selection menu
+---------------------------------------------------------------------------
+local menu = new("Frame", {
+	Parent = gui, Name = "TeamMenu", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0),
+	BackgroundTransparency = 0.35, ZIndex = 10,
+})
+label({
+	Parent = menu, Text = string.upper(Config.GameName), Size = UDim2.new(0.8, 0, 0.12, 0), Position = UDim2.new(0.1, 0, 0.08, 0),
+	Font = Enum.Font.GothamBlack, TextColor3 = GOLD, ZIndex = 11,
+})
+label({
+	Parent = menu, Text = "Pick a side", Size = UDim2.new(0.6, 0, 0.05, 0), Position = UDim2.new(0.2, 0, 0.21, 0), ZIndex = 11,
+})
+local cards = new("Frame", {
+	Parent = menu, Size = UDim2.new(0.8, 0, 0.5, 0), Position = UDim2.new(0.1, 0, 0.3, 0), BackgroundTransparency = 1, ZIndex = 11,
+}, {
+	new("UIListLayout", {
+		FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Center,
+		Padding = UDim.new(0.04, 0),
+	}),
+})
+
+local function teamCard(teamKey, title, blurb, color)
+	local card = button({
+		Parent = cards, Size = UDim2.new(0.4, 0, 1, 0), BackgroundColor3 = color, Text = "", ZIndex = 12,
+	}, function()
+		Remotes:WaitForChild("ChooseTeam"):FireServer(teamKey)
+		if player.Character then
+			-- already spawned: close the menu (the server respawns us if the team changes)
+			menu.Visible = false
+			hud.Visible = true
+		end
+	end)
+	label({ Parent = card, Text = title, Size = UDim2.new(1, 0, 0.3, 0), Font = Enum.Font.GothamBlack, ZIndex = 13 })
+	label({
+		Parent = card, Text = blurb, Size = UDim2.new(1, 0, 0.55, 0), Position = UDim2.new(0, 0, 0.38, 0),
+		Font = Enum.Font.GothamMedium, TextWrapped = true, ZIndex = 13,
+	})
+end
+teamCard("Police", "POLICE", "Respond to alarms, chase robbers and cuff them to collect their bounty.", Color3.fromRGB(35, 80, 190))
+teamCard("Criminal", "CRIMINAL", "Rob stores, outrun the cops and stash your loot at the Hideout.", Color3.fromRGB(180, 40, 40))
+
+local function setMenuVisible(visible)
+	menu.Visible = visible
+	hud.Visible = not visible
+end
+
+---------------------------------------------------------------------------
+-- Store status panel (right side)
+---------------------------------------------------------------------------
+local statusPanel = new("Frame", {
+	Parent = gui, Name = "Stores", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0.28, 0),
+	Size = UDim2.new(0, 230, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundColor3 = PANEL, BackgroundTransparency = 0.25,
+}, { corner(12), padding(10), new("UIListLayout", { Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder }) })
+label({ Parent = statusPanel, Text = "STORES", Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 0, TextColor3 = GOLD })
+local statusRows = {}
+local statusFolder = ReplicatedStorage:WaitForChild("RobberyStatus")
+
+---------------------------------------------------------------------------
+-- Robbery progress bar (above the hotbar)
+---------------------------------------------------------------------------
+local robBar = new("Frame", {
+	Parent = gui, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -110), Size = UDim2.new(0, 360, 0, 46),
+	BackgroundColor3 = PANEL, BackgroundTransparency = 0.2, Visible = false,
+}, { corner(10) })
+local robFill = new("Frame", {
+	Parent = robBar, Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = GOLD, BorderSizePixel = 0,
+}, { corner(10) })
+local robText = label({ Parent = robBar, Size = UDim2.new(1, -16, 1, -12), Position = UDim2.new(0, 8, 0, 6), Text = "", ZIndex = 2 })
+
+---------------------------------------------------------------------------
+-- Notifications (top center)
+---------------------------------------------------------------------------
+local notifyList = new("Frame", {
+	Parent = gui, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 8), Size = UDim2.new(0.6, 0, 0, 0),
+	AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, ZIndex = 30,
+}, { new("UIListLayout", { Padding = UDim.new(0, 4), HorizontalAlignment = Enum.HorizontalAlignment.Center }) })
+
+local kindColors = { info = WHITE, good = GREEN, bad = ORANGE, alarm = RED }
+local function notify(text, kind)
+	local items = {}
+	for _, child in ipairs(notifyList:GetChildren()) do
+		if child:IsA("TextLabel") then
+			table.insert(items, child)
+		end
+	end
+	if #items >= 4 then
+		items[1]:Destroy()
+	end
+	local item = label({
+		Parent = notifyList, Text = text, Size = UDim2.new(1, 0, 0, 32), BackgroundTransparency = 0.25,
+		BackgroundColor3 = PANEL, TextColor3 = kindColors[kind] or WHITE, TextWrapped = true,
+	})
+	corner(8).Parent = item
+	padding(4).Parent = item
+	task.delay(kind == "alarm" and 7 or 5, function()
+		if item.Parent then
+			local tween = TweenService:Create(item, TweenInfo.new(0.4), { TextTransparency = 1, BackgroundTransparency = 1 })
+			tween:Play()
+			tween.Completed:Wait()
+			item:Destroy()
+		end
+	end)
+end
+Remotes:WaitForChild("Notify").OnClientEvent:Connect(notify)
+
+---------------------------------------------------------------------------
+-- Shop
+---------------------------------------------------------------------------
+local shop = new("Frame", {
+	Parent = gui, Name = "Shop", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+	Size = UDim2.new(0, 340, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundColor3 = PANEL, Visible = false, ZIndex = 20,
+}, { corner(14), padding(14), new("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder }) })
+label({ Parent = shop, Text = "SHOP", Size = UDim2.new(1, 0, 0, 34), TextColor3 = GOLD, LayoutOrder = 0, ZIndex = 21 })
+
+local function shopButton(order, text, color, enabled, onClick)
+	button({
+		Parent = shop, LayoutOrder = order, Size = UDim2.new(1, 0, 0, 44), ZIndex = 21,
+		BackgroundColor3 = enabled and color or Color3.fromRGB(70, 70, 75),
+		Text = enabled and text or (text .. " (coming soon)"),
+	}, function()
+		if enabled then
+			onClick()
+		end
+	end)
+end
+
+local vipId = Config.GamePasses.VIP
+shopButton(1, "VIP: 2x Cash + Big Bag", GOLD, vipId ~= 0, function()
+	MarketplaceService:PromptGamePassPurchase(player, vipId)
+end)
+for i, product in ipairs(Config.CashProducts) do
+	shopButton(1 + i, product.Label .. " Cash", Color3.fromRGB(40, 150, 70), product.Id ~= 0, function()
+		MarketplaceService:PromptProductPurchase(player, product.Id)
+	end)
+end
+shopButton(10, "Close", Color3.fromRGB(90, 90, 100), true, function()
+	shop.Visible = false
+end)
+
+---------------------------------------------------------------------------
+-- HUD buttons
+---------------------------------------------------------------------------
+local function teamKey()
+	if not player.Team then
+		return nil
+	end
+	for key, info in pairs(Config.Teams) do
+		if player.Team.Name == info.Name then
+			return key
+		end
+	end
+	return nil
+end
+
+button({ Parent = buttonRow, Size = UDim2.new(0.5, -3, 1, 0), BackgroundColor3 = Color3.fromRGB(60, 60, 75), Text = "TEAM" }, function()
+	if teamKey() == "Prisoner" then
+		notify("You can't switch teams while in jail!", "bad")
+		return
+	end
+	setMenuVisible(true)
+end)
+button({ Parent = buttonRow, Size = UDim2.new(0.5, -3, 1, 0), BackgroundColor3 = Color3.fromRGB(40, 150, 70), Text = "SHOP" }, function()
+	shop.Visible = not shop.Visible
+end)
+
+---------------------------------------------------------------------------
+-- Menu camera + showing/hiding the menu
+---------------------------------------------------------------------------
+local camera = workspace.CurrentCamera
+local function menuCamera()
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.CFrame = CFrame.lookAt(Vector3.new(-260, 140, 320), Vector3.new(0, 0, -40))
+end
+
+setMenuVisible(true)
+menuCamera()
+
+player.CharacterAdded:Connect(function(character)
+	camera.CameraType = Enum.CameraType.Custom
+	camera.CameraSubject = character:WaitForChild("Humanoid")
+	setMenuVisible(false)
+end)
+
+---------------------------------------------------------------------------
+-- Refresh loop
+---------------------------------------------------------------------------
+local teamText = {
+	Police = { "POLICE OFFICER", BLUE },
+	Criminal = { "CRIMINAL", RED },
+	Prisoner = { "PRISONER", ORANGE },
+}
+
+local function refreshStatus(now, myLevel)
+	for _, value in ipairs(statusFolder:GetChildren()) do
+		local row = statusRows[value]
+		if not row then
+			row = label({
+				Parent = statusPanel, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = value:GetAttribute("Order") or 99,
+				TextXAlignment = Enum.TextXAlignment.Left, Font = Enum.Font.GothamMedium,
+			})
+			statusRows[value] = row
+		end
+		local name = value:GetAttribute("DisplayName") or value.Name
+		local minLevel = value:GetAttribute("MinLevel") or 1
+		if value.Value == "OPEN" then
+			row.Text = name .. ": OPEN"
+			row.TextColor3 = GREEN
+		elseif value.Value == "ALARM" then
+			row.Text = name .. ": ALARM!"
+			row.TextColor3 = RED
+		else
+			local left = math.max(0, math.ceil((value:GetAttribute("ReopenAt") or now) - now))
+			row.Text = ("%s: closed %d:%02d"):format(name, math.floor(left / 60), left % 60)
+			row.TextColor3 = Color3.fromRGB(160, 160, 160)
+		end
+		if myLevel < minLevel then
+			row.Text = row.Text .. " (Lv " .. minLevel .. ")"
+		end
+	end
+end
+
+while true do
+	task.wait(0.2)
+	local now = workspace:GetServerTimeNow()
+	local key = teamKey()
+	local stats = player:FindFirstChild("leaderstats")
+	local cash = stats and stats:FindFirstChild("Cash")
+	local level = stats and stats:FindFirstChild("Level")
+	local myLevel = level and level.Value or 1
+
+	cashLabel.Text = money(cash and cash.Value or 0)
+	levelLabel.Text = "Level " .. myLevel .. (player:GetAttribute("VIP") and "  |  VIP" or "")
+	local info = key and teamText[key]
+	teamLabel.Text = info and info[1] or ""
+	teamLabel.TextColor3 = info and info[2] or WHITE
+
+	local isCriminal = key == "Criminal"
+	bagLabel.Visible = isCriminal
+	bountyLabel.Visible = isCriminal
+	bagLabel.Text = "Bag: " .. money(player:GetAttribute("Bag"))
+	bountyLabel.Text = "Bounty: " .. money(player:GetAttribute("Bounty"))
+
+	local release = player:GetAttribute("JailRelease")
+	jailLabel.Visible = key == "Prisoner" and release ~= nil
+	if release then
+		jailLabel.Text = ("Released in %ds... or find a way out"):format(math.max(0, math.ceil(release - now)))
+	end
+
+	local robName = player:GetAttribute("RobName")
+	robBar.Visible = robName ~= nil
+	if robName then
+		local p = player:GetAttribute("RobProgress") or 0
+		robFill.Size = UDim2.new(p, 0, 1, 0)
+		robText.Text = (key == "Prisoner" and "Unscrewing %s... %d%%" or "Robbing %s... %d%%"):format(robName, math.floor(p * 100))
+	end
+
+	refreshStatus(now, myLevel)
+end
+]]></ProtectedString></Properties></Item></Item></Item></Item></roblox>
