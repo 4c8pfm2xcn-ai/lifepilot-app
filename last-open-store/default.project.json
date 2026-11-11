@@ -1,0 +1,23 @@
+{
+  "name": "TheLastOpenStore",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": { "$path": "src/shared" }
+    },
+    "ServerScriptService": {
+      "Server": { "$path": "src/server" }
+    },
+    "ServerStorage": {
+      "ServerData": { "$path": "src/serverstorage" }
+    },
+    "StarterGui": {
+      "MainUI": { "$path": "src/gui" }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": { "$path": "src/client" }
+      }
+    }
+  }
+}
